@@ -1,0 +1,77 @@
+- Create Bert and Albert without model and predict
+        However the performance on both model predict and without was the same
+        the performance for batch input and loop with single inputs was the same
+        the difference in performance of Berts and Alberts was in the time to load 
+            the embeddings of differenct sizes
+
+- Check if other models support batch loading
+
+- Check the tokenization functions
+
+- Elmo does not really work like the example in TFHUB. 
+    It seems like it is not available for TF2, and indeed it is not 
+    available for TF2 completely. But for TF1.5
+    But it works like the example he provided
+
+
+- Do a comparison of the time required by each model
+    When Delete is True
+        elmo : Loading
+        elmo 6.225146045999992 (8, 1024)
+        use : Loading
+        use 5.199321649000012 (8, 512)
+        word2vec : Loading
+        word2vec 3.3819721850000093 (8, 500)
+        nnlm : Loading
+        nnlm 1.2342575760000045 (8, 128)
+        bert : Loading
+        Initializing
+        bert 18.736032590000008 (8, 768)
+        albert : Loading
+        Initializing
+        albert 188.95563031000003 (8, 4096)
+
+    When Delete is False
+        elmo  Already Loaded
+        elmo 3.245082924000002 (8, 1024)
+        use  Already Loaded
+        use 0.011411426999984542 (8, 512)
+        word2vec  Already Loaded
+        word2vec 0.001750579000002972 (8, 500)
+        nnlm  Already Loaded
+        nnlm 0.0014799200000084056 (8, 128)
+        bert  Already Loaded
+        Already Initialized
+        bert 8.321629771000005 (8, 768)
+        albert  Already Loaded
+        Already Initialized
+        albert 183.44868148700002 (8, 4096)
+
+
+Berts that had a reasonable matrix:
+      'https://tfhub.dev/tensorflow/bert_en_cased_L-12_H-768_A-12/2',
+      'https://tfhub.dev/tensorflow/bert_en_wwm_uncased_L-24_H-1024_A-16/2',
+      'https://tfhub.dev/tensorflow/albert_en_base/1',
+
+
+
+Evaluate Bert Performances on Different Datasets
+    With and Without Normalization
+
+Develop a metric to say which is better 
+
+Things To Question?
+    The pooled embeddings vs the other
+        Tried with Hugging Face and the results seem better for:
+            normalized cosine
+            minowski
+            normalized correlation
+            jensen shannon 
+            euclidean distance
+            canberra
+            braycurtis
+
+        Tried with TFHub and there are a couple of models which do good
+        
+    The tokenization method
+        Tried with Hugging Face and the same uncorrelated heat map occurs
