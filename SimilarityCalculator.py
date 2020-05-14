@@ -1,52 +1,11 @@
-
-from scipy.spatial import distance
-from sklearn.preprocessing import minmax_scale
-from keyValueHeap import keyValueHeap
-
 import numpy as np
 import tensorflow as tf
 import pandas as pd
 
-
-def _order_keys(key1, key2):
-    return (key1, key2) if key1 < key2 else (key2, key1)
-
-
-def _format_key(key1, key2):
-    return '{}_{}'.format(*_order_keys(key1, key2))
-
-
-def _mark_read(key1, key2, done):
-    return done.add(_format_key(key1, key2))
-
-def assert_row_shapes(row, row_key):
-    if row.shape[0] > 1 :
-        raise Exception('ID Error: Multiple Entries With The same ID = {}'.format(row_key))    
-
-def _get_non_dupicate_keys(keys_1, keys_2):
-    keys = []
-    seen = set()
-    for key_1 in keys_1:
-        for key_2 in keys_2:
-            ordered_key = _order_keys(key_1, key_2)
-            if ordered_key not in seen and key_1 != key_2:
-                keys.append((key_1, key_2))
-                seen.add(ordered_key)
-
-    return list(keys)
-
-
-MAX = 10
-
-
-def update_heaps(heaps, distance_metric, key1, key2, distance):
-    distance_dict = heaps.setdefault(distance_metric, {})
-
-    key1_heap = distance_dict.setdefault(key1, keyValueHeap(MAX))
-    key1_heap.push(distance, key2)
-
-    key2_heap = distance_dict.setdefault(key2, keyValueHeap(MAX))
-    key2_heap.push(distance, key1)
+from scipy.spatial import distance
+from sklearn.preprocessing import minmax_scale
+from utils import assert_row_dim, order_keys, get_non_dupicate_keys, update_heaps
+from keyValueHeap import keyValueHeap
 
 
 class SimilarityCalculator:
@@ -74,7 +33,7 @@ class SimilarityCalculator:
         for distance_metric, distance_results in distances_result.items():
             store_name = '{}/{}_index.h5'.format(self.output_dir, distance_metric)
 
-            print('Writing To ', store_name, sep = '... ')
+            print('Writing To {}'.format(store_name), end = '... ')
             store = pd.HDFStore(store_name)
 
             for key, results in distance_results.items():
@@ -96,6 +55,7 @@ class SimilarityCalculator:
                 chunk1 = hdf.get(chunk1_key)
                 
                 distances_results = dict()
+                print('\nStarting Chunk {}'.format(chunk1_key))
                 for chunk2_key in hdf.keys():
                     chunk2 = hdf.get(
                         chunk2_key) if chunk2_key != chunk1_key else chunk1
@@ -103,24 +63,24 @@ class SimilarityCalculator:
                         chunk1, chunk2, distances_results)
 
                 self.__write_distances_results(distances_results, chunk1.index)
-                print('For Chunk {}'.format(chunk1_key))
+                print('Done with Chunk {}\n'.format(chunk1_key))
         finally:
             hdf.close()
             print('Closing ',file_path)
 
     def __calculate_chunk_similarity(self, chunk1, chunk2, distances_results):
         chunk1_row_keys, chunk2_row_keys = chunk1.index, chunk2.index
-        keys_to_compare = _get_non_dupicate_keys(
+        keys_to_compare = get_non_dupicate_keys(
             chunk1_row_keys, chunk2_row_keys)
 
         for row1_key, row2_key in keys_to_compare:
             for distance_metric, distance_function in self.distances.items():
 
                 row1 = chunk1.loc[row1_key]
-                assert_row_shapes(row1, row1_key)
+                assert_row_dim(row1.ndim, row1_key)
 
                 row2 = chunk2.loc[row2_key]
-                assert_row_shapes(row2, row2_key)
+                assert_row_dim(row2.ndim, row2_key)
 
                 similarity = (-1) * distance_function(row1, row2)
                 update_heaps(distances_results, distance_metric,

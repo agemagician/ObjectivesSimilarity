@@ -5,7 +5,7 @@ import time
 
 from BertModel import BertModel
 from AlbertModel import AlbertModel
-
+from utils import assert_can_write_hd5
 
 class EmbeddingsGenerator:
     def __init__(self, elmo_url='https://tfhub.dev/google/elmo/3',
@@ -33,6 +33,8 @@ class EmbeddingsGenerator:
 
         for model_name in model_names:
             store_name = '{}/{}_{}_embeddings.h5'.format(output_dir, output_file, model_name)
+            assert_can_write_hd5(store_name)
+
             print('Writing To ', store_name)
             store = pd.HDFStore(store_name)
 
