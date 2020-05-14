@@ -27,16 +27,16 @@ class EmbeddingsGenerator:
         self.supported_model_names = [
             'elmo', 'use', 'word2vec', 'nnlm', 'bert', 'albert']
 
-    def get_embeddings_for_csv(self, file, output_dir, chunk_size=100, model_names=None):
+    def get_embeddings_for_csv(self, input_file, output_dir, output_file = '', chunk_size=100, model_names=None):
         self.delete_models = False
         model_names = model_names if model_names is not None else self.supported_model_names
 
         for model_name in model_names:
-            store_name = '{}/{}__.h5'.format(output_dir, model_name)
+            store_name = '{}/{}_{}_embeddings.h5'.format(output_dir, output_file, model_name)
             print('Writing To ', store_name)
             store = pd.HDFStore(store_name)
 
-            for i, chunk in enumerate(pd.read_csv(file, chunksize=chunk_size)):
+            for i, chunk in enumerate(pd.read_csv(input_file, chunksize=chunk_size)):
                 sentences = chunk['sentence']
                 embeds = self.__get_embeddings(model_name, sentences)
 
