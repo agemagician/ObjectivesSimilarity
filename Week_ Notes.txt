@@ -11,12 +11,15 @@
 - Adding WMD (External Feature)
 - Add Figures after normalization
 -------------------------------------------------------------------------
+- ## Similarity Calcualtor Read and Write To File
+- ## Make sample similarity Server
 
 -------------------------------------------------------------------------
-- ## Similarity Calcualtor Read and Write To File
 - ## Documentation + Comments
 - ## Single number to represent the confusion matrix ( Read The Paper ).
   Correlation Between All Matrices to tell whether the model is good or bad.
+    ??? Correlation between all matrices will produce another matrix, how to summarize it?
+    
 - ## Fix Plotters
 - ## Decision About Python and Flask.
 

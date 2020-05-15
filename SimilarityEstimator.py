@@ -8,10 +8,11 @@ from utils import assert_row_dim, order_keys, get_non_dupicate_keys, update_heap
 from keyValueHeap import keyValueHeap
 
 
-class SimilarityCalculator:
+class SimilarityEstimator:
 
     def __init__(self):
 
+        ## TODO: Remove this directory when migrating from google colab
         self.output_dir = '/content/drive/My Drive'
 
         self.distances = {
@@ -27,11 +28,63 @@ class SimilarityCalculator:
             'braycurtis': distance.braycurtis
         }
 
+    def get_available_distance_metrics(self):
+        return list(self.distances.keys())
 
+    def _get_distance_functions(self, distance_metrics):
+        if distance_metrics == None:
+            return self.distances
+        else:
+            return {distance_metric: self.distances[distance_metric] for distance_metric in distance_metrics}
 
-    def __write_distances_results(self, distances_result, ready_keys):
+    def create_index_from_hdf(self, hdf_file, embedding_algoirthm, distance_metrics = None):
+        distance_functions = self._get_distance_functions(distance_metrics)
+
+        print('Opening ', hdf_file)
+        hdf = pd.HDFStore(hdf_file, mode='r')
+
+        try:
+            self.__loop_over_chunks(hdf, embedding_algoirthm, distance_functions)
+        finally:
+            hdf.close()
+            print('Closing ', hdf_file)
+
+    def __loop_over_chunks(self, hdf, embedding_algoirthm, distance_functions):
+        for chunk1_key in hdf.keys():
+            chunk1 = hdf.get(chunk1_key)
+            
+            distances_results = dict()
+            print('\nStarting {} Chunk {}'.format(embedding_algoirthm, chunk1_key))
+            for chunk2_key in hdf.keys():
+                chunk2 = hdf.get(
+                    chunk2_key) if chunk2_key != chunk1_key else chunk1
+                self.__calculate_chunk_chunk_similarity(
+                    chunk1, chunk2, distance_functions, distances_results)
+
+            self.__write_chunk_distances(distances_results, embedding_algoirthm, chunk1.index)
+            print('Done with {} Chunk {}\n'.format(embedding_algoirthm, chunk1_key))        
+
+    def __calculate_chunk_chunk_similarity(self, chunk1, chunk2, distance_functions, distances_results):
+        chunk1_row_keys, chunk2_row_keys = chunk1.index, chunk2.index
+        keys_to_compare = get_non_dupicate_keys(
+            chunk1_row_keys, chunk2_row_keys)
+
+        for row1_key, row2_key in keys_to_compare:
+            for distance_metric, distance_function in distance_functions.items():
+
+                row1 = chunk1.loc[row1_key]
+                assert_row_dim(row1.ndim, row1_key)
+
+                row2 = chunk2.loc[row2_key]
+                assert_row_dim(row2.ndim, row2_key)
+
+                similarity = (-1) * distance_function(row1, row2)
+                update_heaps(distances_results, distance_metric,
+                             row1_key, row2_key, similarity)
+
+    def __write_chunk_distances(self, distances_result, embedding_algoirthm, ready_keys):
         for distance_metric, distance_results in distances_result.items():
-            store_name = '{}/{}_index.h5'.format(self.output_dir, distance_metric)
+            store_name = '{}/{}_{}_index.h5'.format(self.output_dir, embedding_algoirthm, distance_metric)
 
             print('Writing To {}'.format(store_name), end = '... ')
             store = pd.HDFStore(store_name)
@@ -44,47 +97,6 @@ class SimilarityCalculator:
 
             store.close()
             print('Done Writing {} data'.format(distance_metric))
-
-
-    def from_hdf(self, file_path):
-        print('Opening ', file_path)
-        hdf = pd.HDFStore(file_path, mode='r')
-
-        try:
-            for chunk1_key in hdf.keys():
-                chunk1 = hdf.get(chunk1_key)
-                
-                distances_results = dict()
-                print('\nStarting Chunk {}'.format(chunk1_key))
-                for chunk2_key in hdf.keys():
-                    chunk2 = hdf.get(
-                        chunk2_key) if chunk2_key != chunk1_key else chunk1
-                    self.__calculate_chunk_similarity(
-                        chunk1, chunk2, distances_results)
-
-                self.__write_distances_results(distances_results, chunk1.index)
-                print('Done with Chunk {}\n'.format(chunk1_key))
-        finally:
-            hdf.close()
-            print('Closing ',file_path)
-
-    def __calculate_chunk_similarity(self, chunk1, chunk2, distances_results):
-        chunk1_row_keys, chunk2_row_keys = chunk1.index, chunk2.index
-        keys_to_compare = get_non_dupicate_keys(
-            chunk1_row_keys, chunk2_row_keys)
-
-        for row1_key, row2_key in keys_to_compare:
-            for distance_metric, distance_function in self.distances.items():
-
-                row1 = chunk1.loc[row1_key]
-                assert_row_dim(row1.ndim, row1_key)
-
-                row2 = chunk2.loc[row2_key]
-                assert_row_dim(row2.ndim, row2_key)
-
-                similarity = (-1) * distance_function(row1, row2)
-                update_heaps(distances_results, distance_metric,
-                             row1_key, row2_key, similarity)
 
     def cosine(self, data):
         return self.__common_routine(data, self.distances['cosine'])
