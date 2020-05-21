@@ -19,7 +19,8 @@ class EmbeddingsGenerator:
                  nnlm_url='https://tfhub.dev/google/nnlm-en-dim128/2',
                  bert_url='https://tfhub.dev/tensorflow/bert_en_cased_L-12_H-768_A-12/2',
                  albert_url='https://tfhub.dev/tensorflow/albert_en_xxlarge/1',
-                 delete_models=True):
+                 delete_models=True,
+                 verbose = True):
         """[summary]
 
         Keyword Arguments:
@@ -40,6 +41,8 @@ class EmbeddingsGenerator:
         self.albert_url = albert_url
 
         self.delete_models = delete_models
+        self.verbose = verbose
+        
         self.supported_model_names = [
             'elmo', 'use', 'word2vec', 'nnlm', 'bert', 'albert']
 
@@ -83,6 +86,9 @@ class EmbeddingsGenerator:
         return created_files
 
 
+    def __print(self, text):
+        print(text) if self.verbose else None
+
     def __save_embeddings_for_model(self, model_name, store_name, input_csv, chunk_size):
         """
         A helper used by save_embeddings_for_csv. Handles writing the embeddings for a single model.
@@ -93,11 +99,13 @@ class EmbeddingsGenerator:
             input_csv {str} -- path to the csv file to read the sentences from.
             chunk_size {int} -- the function reads from the csv file in chunks, this variable specifies the chunk size.
         """
+
         assert_can_write_hd5(store_name)
-        print('Writing To ', store_name)
+        self.__print('Embeddings Generator: Creating {} embeddings..'.format(model_name))
         store = pd.HDFStore(store_name)
 
         for i, chunk in enumerate(pd.read_csv(input_csv, chunksize=chunk_size)):
+            self.__print('Embeddings Generator: Reading chunk_{} sentences from {}'.format(i, input_csv))
             sentences = chunk['sentence']
             embeds = self.__get_embeddings(model_name, sentences)
 
@@ -108,7 +116,7 @@ class EmbeddingsGenerator:
             store.append('chunk_{}'.format(i), s)
 
         store.close()
-        print('Done Writing {} embeddings'.format(model_name))
+        self.__print('Embeddings Generator: Done Writing {} embeddings to {}\n'.format(model_name, store_name))
         self.__delete_model(model_name) if self.delete_models else None
 
     def get_embeddings(self, model_name, inputs):
@@ -147,7 +155,7 @@ class EmbeddingsGenerator:
             else:
                 return model(inputs)
         else:
-            print('Unsupported Model: ', model_name)
+            self.__print('Embeddings Generator: Unsupported model name "{}"'.format(model_name))
 
     def __model_loader(self, model_name):
         """
@@ -181,10 +189,10 @@ class EmbeddingsGenerator:
             hub.load, BertModel, or AlbertModel --  an object which returns the embedding on __call__
         """
         if not hasattr(self, model_name):
-            print(model_name, ": Loading")
+            self.__print('Embeddings Generator: Loading {} pretrained model'.format(model_name))
             setattr(self, model_name, self.__model_loader(model_name))
         else:
-            print(model_name, " Already Loaded")
+            self.__print('Embeddings Generator: {} already loaded'.format(model_name))
 
         return getattr(self, model_name)
 
@@ -195,6 +203,7 @@ class EmbeddingsGenerator:
         Arguments:
             model_name {str} -- model name to be deleted
         """
+        self.__print('Embeddings Generator: Unloading {} pretrained model'.format(model_name))
         delattr(self, model_name)
 
     def print_shapes_and_time(self, sentences):

@@ -13,10 +13,10 @@ class SimilarityEstimator:
     Handles calculating the similarity between embeddings. Stores the calculated similarities in hd5 file or returns them.
     """
 
-    def __init__(self):
+    def __init__(self, output_dir = '/content/drive/My Drive', verbose = True):
 
-        ## TODO: Remove this directory when migrating from google colab
-        self.output_dir = '/content/drive/My Drive'
+        self.output_dir = output_dir
+        self.verbose = verbose
 
         self.distances = {
             'cosine': distance.cosine,
@@ -30,6 +30,9 @@ class SimilarityEstimator:
             'canberra': distance.canberra,
             'braycurtis': distance.braycurtis
         }
+
+    def __print(self, text, **kwargs):
+        print(text, **kwargs) if self.verbose else None
 
     def get_available_distance_metrics(self):
         """
@@ -68,14 +71,14 @@ class SimilarityEstimator:
         """
         distance_functions = self._get_distance_functions(distance_metrics)
 
-        print('Opening ', hdf_file)
+        self.__print('\nSimilarity Estimator: Opening {}'.format(hdf_file))
         hdf = pd.HDFStore(hdf_file, mode='r')
 
         try:
             self.__loop_over_chunks(hdf, embedding_algoirthm, distance_functions)
         finally:
             hdf.close()
-            print('Closing ', hdf_file)
+            self.__print('Similarity Estimator: Closing {}'.format(hdf_file))
 
     def __loop_over_chunks(self, hdf, embedding_algoirthm, distance_functions):
         """
@@ -90,15 +93,16 @@ class SimilarityEstimator:
             chunk1 = hdf.get(chunk1_key)
             
             distances_results = dict()
-            print('\nStarting {} Chunk {}'.format(embedding_algoirthm, chunk1_key))
+            self.__print('\nSimilarity Estimator: Reading "{}" of "{}"'.format(chunk1_key, embedding_algoirthm))
+            
             for chunk2_key in hdf.keys():
-                chunk2 = hdf.get(
-                    chunk2_key) if chunk2_key != chunk1_key else chunk1
+                chunk2 = hdf.get(chunk2_key) if chunk2_key != chunk1_key else chunk1
+                self.__print('Similarity Estimator: Comparing "{}" and "{}" of {}'.format(chunk1_key, chunk2_key, embedding_algoirthm))
                 self.__calculate_chunk_chunk_similarity(
                     chunk1, chunk2, distance_functions, distances_results)
 
             self.__write_chunk_distances(distances_results, embedding_algoirthm, chunk1.index)
-            print('Done with {} Chunk {}\n'.format(embedding_algoirthm, chunk1_key))        
+            self.__print('Similarity Estimator: Done Reading "{}" for {}\n'.format(chunk1_key, embedding_algoirthm))        
 
     def __calculate_chunk_chunk_similarity(self, chunk1, chunk2, distance_functions, distances_results):
         """
@@ -140,7 +144,7 @@ class SimilarityEstimator:
         for distance_metric, distance_results in distances_result.items():
             store_name = '{}/{}_{}_index.h5'.format(self.output_dir, embedding_algoirthm, distance_metric)
 
-            print('Writing To {}'.format(store_name), end = '... ')
+            self.__print('Similarity Estimator: Writing indexed data To {}'.format(store_name), end = '... ')
             store = pd.HDFStore(store_name)
 
             for key, results in distance_results.items():
@@ -150,9 +154,9 @@ class SimilarityEstimator:
                 store.append('key_{}'.format(key), ordered_results_df)
 
             store.close()
-            print('Done Writing {} data'.format(distance_metric))
+            self.__print('Done Writing {} data'.format(distance_metric))
 
-    def cosine(self, data):
+    def cosine(self, data: list):
         """
         Calculates cosine distance
 
@@ -164,7 +168,7 @@ class SimilarityEstimator:
         """
         return self.__common_routine(data, self.distances['cosine'])
 
-    def minkowski(self, data):
+    def minkowski(self, data: list):
         """
         Calculates minkowski distance
 
@@ -176,7 +180,7 @@ class SimilarityEstimator:
         """        
         return self.__common_routine(data, self.distances['minkowski'])
 
-    def correlation(self, data):
+    def correlation(self, data: list):
         """
         Calculates correlation of input data
 
@@ -202,7 +206,7 @@ class SimilarityEstimator:
         """        
         return self.__common_routine(data, self.distances['jensenshannon'])
 
-    def cityblock_distance(self, data):
+    def cityblock_distance(self, data: list):
         """
         Calculates cityblock distance
 
@@ -214,7 +218,7 @@ class SimilarityEstimator:
         """        
         return self.__common_routine(data, self.distances['cityblock'])
 
-    def squared_euclidian_distance(self, data):
+    def squared_euclidian_distance(self, data: list):
         """
         Calculates squared euclidean distance
 
@@ -226,7 +230,7 @@ class SimilarityEstimator:
         """        
         return self.__common_routine(data, self.distances['sqeuclidean'])
 
-    def euclidean_distance(self, data):
+    def euclidean_distance(self, data: list):
         """
         Calculates euclidean distance
 
@@ -238,7 +242,7 @@ class SimilarityEstimator:
         """        
         return self.__common_routine(data, self.distances['euclidean'])
 
-    def chebyshev_distance(self, data):
+    def chebyshev_distance(self, data: list):
         """
         Calculates chebyshev distance
 
@@ -250,7 +254,7 @@ class SimilarityEstimator:
         """        
         return self.__common_routine(data, self.distances['chebyshev'])
 
-    def canberra_distance(self, data):
+    def canberra_distance(self, data: list):
         """
         Calculates canberra distance
 
@@ -262,7 +266,7 @@ class SimilarityEstimator:
         """        
         return self.__common_routine(data, self.distances['canberra'])
 
-    def braycurtis_distance(self, data):
+    def braycurtis_distance(self, data: list):
         """
         Calculates braycurtis distance
 

@@ -1,3 +1,5 @@
+from SimilarityEstimator import SimilarityEstimator
+from EmbeddingsGenerator import EmbeddingsGenerator
 import pandas as pd
 import random
 import string
@@ -9,7 +11,10 @@ class SimilarityServer:
   Prelimenary backend server to drive the whole process.
   """
 
-  def __init__(self, embeddings_generator, similarity_estimator, output_dir = '/content/drive/My Drive'):
+  def __init__(self,
+    embeddings_generator: EmbeddingsGenerator,
+    similarity_estimator: SimilarityEstimator,
+    output_dir = '/content/drive/My Drive'):
     """
     Server takes an instance of the embeddings generator class, and and instance of the similarity estimator class.
 

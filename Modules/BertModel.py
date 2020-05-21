@@ -49,16 +49,7 @@ class BertModel:
 
     def init_model(self):
         print('Initializing')
-        # input_word_ids = tf.keras.layers.Input(shape=(self.max_seq_length,), dtype=tf.int32,
-        #                                       name="input_word_ids")
-        # input_mask = tf.keras.layers.Input(shape=(self.max_seq_length,), dtype=tf.int32,
-        #                                   name="input_mask")
-        # segment_ids = tf.keras.layers.Input(shape=(self.max_seq_length,), dtype=tf.int32,
-        #                                     name="segment_ids")
-
         self.model = hub.KerasLayer(self.url, trainable=self.trainable)
-
-        # pooled_output, sequence_output = self.model([input_word_ids, input_mask, segment_ids])
 
         self.tokenizer = self.get_tokenizer()
 
