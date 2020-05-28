@@ -1,9 +1,49 @@
-<html>
-   <body>
-      <form action = "http://localhost:5000/uploader" method = "POST" 
-         enctype = "multipart/form-data">
-         <input type = "file" name = "file" />
-         <input type = "submit"/>
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Task Master</title>
+{% endblock %}
+
+{% block body %}
+
+<div class="content">
+   <fieldset>
+      <form action="http://localhost:5000/uploader" method="POST" enctype="multipart/form-data">
+
+         <div class="checkbox text-left">
+            <p><strong>Choose Embedding Techniques:</strong></p>
+            {% for embedding in embeddings %}
+            <label>
+               <input type="checkbox" name="embedding" value="{{ embedding }}">
+               {{ embedding }}
+            </label>
+            <br />
+            {% endfor %}
+         </div>
+
+
+         <div class="checkbox text-left">
+            <p><strong>Choose Similarity Metrics:</strong></p>
+            {% for similarity_metric in similarity_metrics %}
+            <label>
+               <input type="checkbox" name="similarity_metric" value="{{ similarity_metric }}">
+               {{ similarity_metric }}
+            </label>
+            <br />
+            {% endfor %}
+
+         </div>
+         
+         <br>
+         <div>
+            <input type="file" name="file" />
+            <input type="submit" />
+         </div>
+
       </form>
-   </body>
-</html>
+   </fieldset>
+
+</div>
+
+
+{% endblock %}

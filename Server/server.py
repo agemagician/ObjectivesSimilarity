@@ -20,21 +20,34 @@ similarityEstimator = SimilarityEstimator(output_dir=OUTPUT_DIR)
 similarity_server = SimilarityWrapper(embeddingsGenerator, similarityEstimator, output_dir=OUTPUT_DIR)
 input_csv = os.path.abspath('static/uploads/minyset.csv')
 
+
+@app.route('/', methods=['GET'])
+def index():
+    embeddings = similarity_server.get_available_embedding_algorithms()
+    return render_template('index.html', embeddings=embeddings)
+
+
 ## Renders the web page to upload the csv file
 @app.route('/upload')
 def upload():
-   return render_template('upload.html')
+    embeddings = similarity_server.get_available_embedding_algorithms()
+    similarity_metrics = similarity_server.get_available_distance_metrics()
+    return render_template('upload.html', embeddings = embeddings, similarity_metrics = similarity_metrics)
 
 
 ## Uploads the csv file which will be used to generate the embeddings
 @app.route('/uploader', methods = ['GET', 'POST'])
 def upload_file():
-   if request.method == 'POST':
-      f = request.files['file']
-      file_path = '{}/{}'.format(UPLOAD_FOLDER, secure_filename(f.filename))
-      f.save(file_path)
-      input_csv = file_path
-      return 'file uploaded successfully'
+    print(request.form)
+    if request.method == 'POST':
+        selected_embeddings = request.form.getlist('embedding')
+        selected_metrics = request.form.getlist('similarity_metric')
+
+        f = request.files['file']
+        file_path = '{}/{}'.format(UPLOAD_FOLDER, secure_filename(f.filename))
+        f.save(file_path)
+        input_csv = file_path
+        return 'file uploaded successfully'
 
 
 ## GET Request: Returns the list of supported models
