@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block body %}
+<div class="content">
+    <h3 style="text-align: center">Search For Similar Employees</h3>
+
+
+    <fieldset>
+        <div class="form">
+            <form action="http://localhost:5000/search" method="POST">
+
+                <div class="checkbox text-left">
+                    <p><strong>Choose Embedding Techniques:</strong></p>
+                    {% for embedding in embeddings %}
+                    <label>
+                        <input type="radio" name="embedding" value="{{ embedding }}">
+                        {{ embedding }}
+                    </label>
+                    <br />
+                    {% endfor %}
+                </div>
+
+
+                <div class="checkbox text-left">
+                    <p><strong>Choose Similarity Metrics:</strong></p>
+                    {% for similarity_metric in similarity_metrics %}
+                    <label>
+                        <input type="radio" name="similarity_metric" value="{{ similarity_metric }}">
+                        {{ similarity_metric }}
+                    </label>
+                    <br />
+                    {% endfor %}
+
+                </div>
+                <br>
+
+                <label for="max_k"> Number of users to retrive </label><br>
+                <input type="text" id="k" name="k"> <br>
+
+                <br>
+                <div>
+                    <label> User ID </label><br>
+                    <input type="text" name="id" id="id">
+                    <input type="submit" value="Find Similar">
+                </div>
+            </form>
+        </div>
+    </fieldset>
+
+    {% if similar|length < 1 %}
+    {% else %}
+    <div>
+        Objectives Similar to: "{{ obj[0] }}"
+    </div>
+    <table>
+        <tr>
+            <th>User ID</th>
+            <th>Similarity Score</th>
+            <th>User Objective</th>
+        </tr>
+        {% for id, sim in similar.iterrows() %}
+            <tr>
+                <td>{{ id }}</td>
+                <td>{{ sim['distance'] }}</td>
+                <td>{{ sim['sentence'] }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+
+</div>
+</div>
+{% endblock %}

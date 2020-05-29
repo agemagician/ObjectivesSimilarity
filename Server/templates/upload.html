@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<title>Task Master</title>
 {% endblock %}
 
 {% block body %}
 
 <div class="content">
+   <h3 style="text-align: center">Create Data Index</h3>
+
    <fieldset>
       <form action="http://localhost:5000/uploader" method="POST" enctype="multipart/form-data">
 
@@ -33,17 +34,30 @@
             {% endfor %}
 
          </div>
-         
+         <br>
+
+         <label for="max_k"> Number of users to index </label><br>
+         <input type="text" id="max_k" name="max_k"> <br>
+
+         <label for="id_key"> Name of the column with user ID </label><br>
+         <input type="text" id="id_key" name="id_key"> <br>
+
+         <label for="sentence_key"> Name of the column with user objective </label><br>
+         <input type="text" id="sentence_key" name="sentence_key"> <br>
+
+         <label for="chunk_size"> Chunk Size </label><br>
+         <input type="text" id="chunk_size" name="chunk_size"> <br>
+
          <br>
          <div>
             <input type="file" name="file" />
             <input type="submit" />
          </div>
 
+
       </form>
    </fieldset>
 
 </div>
-
 
 {% endblock %}

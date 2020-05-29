@@ -21,18 +21,35 @@ similarity_server = SimilarityWrapper(embeddingsGenerator, similarityEstimator, 
 input_csv = os.path.abspath('static/uploads/minyset.csv')
 
 
-@app.route('/', methods=['GET'])
-def index():
-    embeddings = similarity_server.get_available_embedding_algorithms()
-    return render_template('index.html', embeddings=embeddings)
+available_embeddings = similarity_server.get_available_embedding_algorithms()
+available_similarity_metrics = similarity_server.get_available_distance_metrics()
 
+
+## Renders the web page to upload the csv file
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+    if request.method == 'POST':
+        user_id = request.form['id']
+        K = int(request.form['k'])
+        model_name = request.form['embedding']
+        similarity_metric = request.form['similarity_metric']
+        sentence, similar = similarity_server.get_most_similar_K_to(user_id, K, model_name, similarity_metric, input_csv)
+        
+        print(similar.keys())
+        
+        return render_template('search.html', obj = sentence, similar=similar, embeddings= available_embeddings, similarity_metrics = available_similarity_metrics)
+    else:
+        return render_template('search.html', embeddings = available_embeddings, similarity_metrics = available_similarity_metrics)
 
 ## Renders the web page to upload the csv file
 @app.route('/upload')
 def upload():
-    embeddings = similarity_server.get_available_embedding_algorithms()
-    similarity_metrics = similarity_server.get_available_distance_metrics()
-    return render_template('upload.html', embeddings = embeddings, similarity_metrics = similarity_metrics)
+    return render_template('upload.html', embeddings = available_embeddings, similarity_metrics = available_similarity_metrics)
 
 
 ## Uploads the csv file which will be used to generate the embeddings
@@ -43,11 +60,20 @@ def upload_file():
         selected_embeddings = request.form.getlist('embedding')
         selected_metrics = request.form.getlist('similarity_metric')
 
+        max_k = int(request.form['max_k'])
+        chunk_size = int(request.form['chunk_size'])
+
+        id_key = request.form['id_key']
+        sentence_key = request.form['sentence_key']
+
         f = request.files['file']
         file_path = '{}/{}'.format(UPLOAD_FOLDER, secure_filename(f.filename))
         f.save(file_path)
         input_csv = file_path
-        return 'file uploaded successfully'
+
+        _generate_models(chunk_size, selected_embeddings, id_key, sentence_key, max_k, selected_metrics, input_csv)
+        # print(chunk_size, selected_embeddings, id_key, sentence_key, max_k, selected_metrics, input_csv)
+        return 'Embeddings Generated Successfully'
 
 
 ## GET Request: Returns the list of supported models
@@ -80,11 +106,7 @@ def generate_models():
 
     print('Generating {} for {}'.format(models, metrics))
     
-    output_prefix = ''.join(random.choices(string.ascii_uppercase, k=5))
-
-    embedding_files = similarity_server.generate_emeddings_from_csv(input_csv, OUTPUT_DIR, output_prefix, chunk_size, models, id_key, sentence_key)
-    for embedding_algorithm, embedding_file in embedding_files.items():
-        similarity_server.create_embeddings_index(embedding_file, embedding_algorithm, max_k, metrics)
+    _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv)
 
     return Response(status=201)
 
@@ -111,6 +133,14 @@ def get_nearest():
     K = request.json['K']
     __, nearest = similarity_server.get_most_similar_K_to(id, K, method, metric, input_csv)
     return nearest.to_json()
+
+
+def _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv):
+    output_prefix = ''.join(random.choices(string.ascii_uppercase, k=5))
+
+    embedding_files = similarity_server.generate_emeddings_from_csv(input_csv, OUTPUT_DIR, output_prefix, chunk_size, models, id_key, sentence_key)
+    for embedding_algorithm, embedding_file in embedding_files.items():
+        similarity_server.create_embeddings_index(embedding_file, embedding_algorithm, max_k, metrics)
 
 
 if __name__ == '__main__':
