@@ -34,7 +34,7 @@ def index():
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     if request.method == 'POST':
-        user_id = request.form['id']
+        user_id = int(request.form['id'])
         K = int(request.form['k'])
         model_name = request.form['embedding']
         similarity_metric = request.form['similarity_metric']
@@ -99,13 +99,14 @@ def get_metrics():
 def generate_models():
     models = request.json['models']
     metrics = request.json['metrics']
-    max_k = request.json['max_k']
-    chunk_size = request.json['chunk_size']
+    max_k = int(request.json['max_k'])
+    chunk_size = int(request.json['chunk_size'])
     id_key = request.json['id_key']
     sentence_key = request.json['sentence_key']
 
     print('Generating {} for {}'.format(models, metrics))
     
+    print(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv)
     _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv)
 
     return Response(status=201)

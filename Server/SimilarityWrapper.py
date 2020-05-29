@@ -66,7 +66,6 @@ class SimilarityWrapper:
 
     similar_k = pd.concat([similar_k, sentences], axis=1, join='inner')
 
-    id = int(id)
     print(sentences.loc[id][0])
     print(tabulate(similar_k.sort_values('distance')))
 
