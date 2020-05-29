@@ -25,12 +25,13 @@ available_embeddings = similarity_server.get_available_embedding_algorithms()
 available_similarity_metrics = similarity_server.get_available_distance_metrics()
 
 
-## Renders the web page to upload the csv file
+## Renders the Home Page
 @app.route('/')
 def index():
     return render_template('index.html')
 
 
+## Renders the page to query for similar users
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     if request.method == 'POST':
