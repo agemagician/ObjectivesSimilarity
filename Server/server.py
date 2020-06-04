@@ -18,7 +18,8 @@ OUTPUT_DIR = os.path.abspath('embeddings')
 embeddingsGenerator = EmbeddingsGenerator(delete_models=False)
 similarityEstimator = SimilarityEstimator(output_dir=OUTPUT_DIR)
 similarity_server = SimilarityWrapper(embeddingsGenerator, similarityEstimator, output_dir=OUTPUT_DIR)
-input_csv = os.path.abspath('static/uploads/minyset.csv')
+input_csv = os.path.abspath('static/uploads/tinyset.csv')
+input_csv = ''
 
 
 available_embeddings = similarity_server.get_available_embedding_algorithms()

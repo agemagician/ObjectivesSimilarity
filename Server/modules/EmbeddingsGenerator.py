@@ -47,8 +47,18 @@ class EmbeddingsGenerator:
         self.delete_models = delete_models
         self.verbose = verbose
         
-        self.supported_model_names = [
-            'elmo', 'use', 'word2vec', 'nnlm', 'bert', 'albert']
+        self.models = {
+            'use': USEModel,
+            'word2vec': Word2VecModel,
+            'nnlm': NNLMModel,
+            'bert': BertModel,
+            'albert': AlbertModel,
+            'elmo': ElmoModel
+        }
+
+        self.supported_model_names = self.models.keys()
+
+
 
     def get_supported_model_names(self):
         """
@@ -139,6 +149,7 @@ class EmbeddingsGenerator:
             list -- list of generated embeddings
         """
         embeddings = self.__get_embeddings(model_name, inputs)
+        print('################# ', type(embeddings))
         self.__delete_model(model_name) if self.delete_models else None
 
         return embeddings
@@ -173,24 +184,8 @@ class EmbeddingsGenerator:
             hub.load, BertModel, or AlbertModel --  an object which returns the embedding on __call__
         """
         model_url = getattr(self, model_name + '_url')
-
-        if model_name == 'use':
-            return USEModel(URL=model_url, delete_models=self.delete_models)
-
-        elif model_name == 'word2vec':
-            return Word2VecModel(URL=model_url, delete_models=self.delete_models)
-        
-        elif model_name == 'nnlm':
-            return NNLMModel(URL=model_url, delete_models=self.delete_models)
-
-        elif model_name == 'bert':
-            return BertModel(URL=model_url, delete_models=self.delete_models)
-
-        elif model_name == 'albert':
-            return AlbertModel(URL=model_url, delete_models=self.delete_models)
-        
-        elif model_name == 'elmo':
-            return ElmoModel(URL=model_url, delete_models=self.delete_models)
+        modelObject = self.models[model_name]
+        return modelObject(URL=model_url, delete_models=self.delete_models)
 
     def __load_or_get_model(self, model_name):
         """

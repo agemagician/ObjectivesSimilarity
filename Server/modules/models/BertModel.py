@@ -44,6 +44,7 @@ class BertModel:
 
         if self.delete_models:
             del self.model
+            self.__is_init = False
 
         return tf.math.reduce_mean(sequence_output, axis=1)
 

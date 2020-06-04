@@ -1,11 +1,5 @@
 import tensorflow as tf
 import tensorflow_hub as hub
-""" 
-Adapted and Modifided From https://colab.research.google.com/drive/1hMLd5-r82FrnFnBub-B-fVW78Px4KPX1#scrollTo=gmR3jHYE_y3X
-A wrapper class around the main functionality of BERT
-The primary method is get_embeddings
-"""
-
 
 class ElmoModel:
 
@@ -33,6 +27,7 @@ class ElmoModel:
 
         if self.delete_models:
             del self.model
+            self.__is_init = False
 
         return embeddings
 

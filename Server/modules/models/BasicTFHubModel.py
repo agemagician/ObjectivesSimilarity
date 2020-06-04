@@ -25,6 +25,7 @@ class BasicTFHubModel:
 
         if self.delete_models:
             del self.model
+            self.__is_init = False
 
         return embeddings
 
