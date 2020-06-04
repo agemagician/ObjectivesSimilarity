@@ -4,9 +4,9 @@ import random
 import string
 from flask import Flask, render_template, request, Response
 from werkzeug.utils import secure_filename
-from EmbeddingsGenerator import EmbeddingsGenerator
-from SimilarityEstimator import SimilarityEstimator
-from SimilarityWrapper import SimilarityWrapper
+from modules.EmbeddingsGenerator import EmbeddingsGenerator
+from modules.SimilarityEstimator import SimilarityEstimator
+from modules.SimilarityWrapper import SimilarityWrapper
 
 app = Flask(__name__)
 

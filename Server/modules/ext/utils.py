@@ -1,5 +1,5 @@
 import os.path
-from keyValueHeap import keyValueHeap
+from modules.ext.keyValueHeap import keyValueHeap
 
 
 def assert_can_write_hd5(file_name):

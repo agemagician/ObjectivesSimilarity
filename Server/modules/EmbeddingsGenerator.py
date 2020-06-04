@@ -3,9 +3,10 @@ import tensorflow_hub as hub
 import pandas as pd
 import time
 
-from BertModel import BertModel
-from AlbertModel import AlbertModel
-from utils import assert_can_write_hd5
+from modules.models.BertModel import BertModel
+from modules.models.AlbertModel import AlbertModel
+from modules.models.ElmoModel import ElmoModel
+from modules.ext.utils import assert_can_write_hd5
 
 
 class EmbeddingsGenerator:
@@ -154,10 +155,7 @@ class EmbeddingsGenerator:
         """
         if model_name in self.supported_model_names:
             model = self.__load_or_get_model(model_name)
-            if model_name == 'elmo':
-                return model.signatures['default'](tf.constant(inputs))["default"]
-            else:
-                return model(inputs)
+            return model(inputs)
         else:
             self.__print('Embeddings Generator: Unsupported model name "{}"'.format(model_name))
 
@@ -173,7 +171,7 @@ class EmbeddingsGenerator:
         """
         model_url = getattr(self, model_name + '_url')
 
-        if model_name in ['elmo', 'use', 'word2vec', 'nnlm']:
+        if model_name in ['use', 'word2vec', 'nnlm']:
             return hub.load(model_url)
 
         elif model_name == 'bert':
@@ -181,6 +179,9 @@ class EmbeddingsGenerator:
 
         elif model_name == 'albert':
             return AlbertModel(URL=model_url, delete_models=self.delete_models)
+        
+        elif model_name == 'elmo':
+            return ElmoModel(URL=model_url, delete_models=self.delete_models)
 
     def __load_or_get_model(self, model_name):
         """

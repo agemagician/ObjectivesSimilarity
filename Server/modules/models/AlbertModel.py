@@ -1,5 +1,5 @@
-import tokenization
-from BertModel import BertModel
+import modules.ext.tokenization as tokenization
+from modules.models.BertModel import BertModel
 
 """
 A wrapper class around Albert

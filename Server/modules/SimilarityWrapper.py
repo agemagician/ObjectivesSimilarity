@@ -1,5 +1,5 @@
-from SimilarityEstimator import SimilarityEstimator
-from EmbeddingsGenerator import EmbeddingsGenerator
+from modules.SimilarityEstimator import SimilarityEstimator
+from modules.EmbeddingsGenerator import EmbeddingsGenerator
 import pandas as pd
 import random
 import string

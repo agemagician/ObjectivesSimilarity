@@ -4,8 +4,8 @@ import pandas as pd
 
 from scipy.spatial import distance
 from sklearn.preprocessing import minmax_scale
-from utils import assert_row_dim, order_keys, get_non_dupicate_keys, update_heaps
-from keyValueHeap import keyValueHeap
+from modules.ext.utils import assert_row_dim, order_keys, get_non_dupicate_keys, update_heaps
+from modules.ext.keyValueHeap import keyValueHeap
 
 
 class SimilarityEstimator:
