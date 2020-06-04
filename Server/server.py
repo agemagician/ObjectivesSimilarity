@@ -19,7 +19,6 @@ embeddingsGenerator = EmbeddingsGenerator(delete_models=False)
 similarityEstimator = SimilarityEstimator(output_dir=OUTPUT_DIR)
 similarity_server = SimilarityWrapper(embeddingsGenerator, similarityEstimator, output_dir=OUTPUT_DIR)
 input_csv = os.path.abspath('static/uploads/tinyset.csv')
-input_csv = ''
 
 
 available_embeddings = similarity_server.get_available_embedding_algorithms()
@@ -40,6 +39,9 @@ def search():
         K = int(request.form['k'])
         model_name = request.form['embedding']
         similarity_metric = request.form['similarity_metric']
+
+        print(similarity_metric, model_name)
+
         sentence, similar = similarity_server.get_most_similar_K_to(user_id, K, model_name, similarity_metric, input_csv)
         
         print(similar.keys())

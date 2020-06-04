@@ -9,6 +9,10 @@ from modules.models.ElmoModel import ElmoModel
 from modules.models.USEModel import USEModel
 from modules.models.Word2VecModel import Word2VecModel
 from modules.models.NNLMModel import NNLMModel
+from modules.models.xlnetModel import xLnetModel
+from modules.models.xlmModel import xlmModel
+
+
 from modules.ext.utils import assert_can_write_hd5
 
 
@@ -23,9 +27,11 @@ class EmbeddingsGenerator:
                  nnlm_url='https://tfhub.dev/google/nnlm-en-dim128/2',
                  bert_url='https://tfhub.dev/tensorflow/bert_en_cased_L-12_H-768_A-12/2',
                  albert_url='https://tfhub.dev/tensorflow/albert_en_xxlarge/1',
+                 xlnet_url = 'xlnet-large-cased',
+                 xlm_url = 'xlm-mlm-en-2048',
                  delete_models=True,
                  verbose = True):
-        """[summary]
+        """
 
         Keyword Arguments:
             elmo_url {str} -- url for the elmo model from tfhub. (default: {'https://tfhub.dev/google/elmo/3'})
@@ -37,12 +43,15 @@ class EmbeddingsGenerator:
             delete_models {bool} -- whether to delete the downloaded models after generating the embeddings or to keep them stored.(default: {True})
         """
 
+        ## URL attributes used by __model_loader
         self.elmo_url = elmo_url
         self.use_url = use_url
         self.word2vec_url = word2vec_url
         self.nnlm_url = nnlm_url
         self.bert_url = bert_url
         self.albert_url = albert_url
+        self.xlnet_url = xlnet_url
+        self.xlm_url = xlm_url
 
         self.delete_models = delete_models
         self.verbose = verbose
@@ -53,7 +62,9 @@ class EmbeddingsGenerator:
             'nnlm': NNLMModel,
             'bert': BertModel,
             'albert': AlbertModel,
-            'elmo': ElmoModel
+            'elmo': ElmoModel,
+            'xlm': xlmModel,
+            'xlnet': xLnetModel
         }
 
         self.supported_model_names = self.models.keys()
