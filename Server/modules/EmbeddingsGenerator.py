@@ -6,6 +6,9 @@ import time
 from modules.models.BertModel import BertModel
 from modules.models.AlbertModel import AlbertModel
 from modules.models.ElmoModel import ElmoModel
+from modules.models.USEModel import USEModel
+from modules.models.Word2VecModel import Word2VecModel
+from modules.models.NNLMModel import NNLMModel
 from modules.ext.utils import assert_can_write_hd5
 
 
@@ -171,8 +174,14 @@ class EmbeddingsGenerator:
         """
         model_url = getattr(self, model_name + '_url')
 
-        if model_name in ['use', 'word2vec', 'nnlm']:
-            return hub.load(model_url)
+        if model_name == 'use':
+            return USEModel(URL=model_url, delete_models=self.delete_models)
+
+        elif model_name == 'word2vec':
+            return Word2VecModel(URL=model_url, delete_models=self.delete_models)
+        
+        elif model_name == 'nnlm':
+            return NNLMModel(URL=model_url, delete_models=self.delete_models)
 
         elif model_name == 'bert':
             return BertModel(URL=model_url, delete_models=self.delete_models)
