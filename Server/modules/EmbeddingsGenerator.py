@@ -67,7 +67,7 @@ class EmbeddingsGenerator:
             'xlnet': xLnetModel
         }
 
-        self.supported_model_names = self.models.keys()
+        self.supported_model_names = list(self.models.keys())
 
 
 

@@ -3,12 +3,15 @@ import os
 import random
 import string
 from flask import Flask, render_template, request, Response
+from flask_cors import CORS, cross_origin
 from werkzeug.utils import secure_filename
 from modules.EmbeddingsGenerator import EmbeddingsGenerator
 from modules.SimilarityEstimator import SimilarityEstimator
 from modules.SimilarityWrapper import SimilarityWrapper
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 ## Constants
 UPLOAD_FOLDER = 'static/uploads'
@@ -24,7 +27,13 @@ input_csv = os.path.abspath('static/uploads/tinyset.csv')
 available_embeddings = similarity_server.get_available_embedding_algorithms()
 available_similarity_metrics = similarity_server.get_available_distance_metrics()
 
-
+@app.after_request
+def after_request(response):
+   response.headers.add('Access-Control-Allow-Origin', '*')
+   response.headers.add('Access-Control-Allow-Headers', 'Content-  Type,Authorization')
+   response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+   return response
+   
 ## Renders the Home Page
 @app.route('/')
 def index():
@@ -32,6 +41,7 @@ def index():
 
 
 ## Renders the page to query for similar users
+@cross_origin()
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     if request.method == 'POST':
@@ -51,12 +61,14 @@ def search():
         return render_template('search.html', embeddings = available_embeddings, similarity_metrics = available_similarity_metrics)
 
 ## Renders the web page to upload the csv file
+@cross_origin()
 @app.route('/upload')
 def upload():
     return render_template('upload.html', embeddings = available_embeddings, similarity_metrics = available_similarity_metrics)
 
 
 ## Uploads the csv file which will be used to generate the embeddings
+@cross_origin()
 @app.route('/uploader', methods = ['GET', 'POST'])
 def upload_file():
     print(request.form)
@@ -81,12 +93,14 @@ def upload_file():
 
 
 ## GET Request: Returns the list of supported models
+@cross_origin()
 @app.route('/models', methods = ['GET'])
 def get_models():
     return json.dumps(similarity_server.get_available_embedding_algorithms())
 
 
 ## GET Request: Returns the list of supported distance metrics
+@cross_origin()
 @app.route('/metrics', methods = ['GET'])
 def get_metrics():
     return json.dumps(similarity_server.get_available_distance_metrics())
@@ -99,6 +113,7 @@ def get_metrics():
 ##      chunk_size: integer, chunk size to use in reading data from csv file
 ##      id_key: str, name of the column with the user ids
 ##      sentence_key: str, name of the column with user objectives
+@cross_origin()
 @app.route('/generate_models', methods = ['POST'])
 def generate_models():
     models = request.json['models']
@@ -118,6 +133,7 @@ def generate_models():
 ## Post Request: Returns the objective of the given user is
 ## Params:
 ##      id: integer, the id of the user to return their objective
+@cross_origin()
 @app.route('/get_sentence', methods = ['POST'])
 def get_sentence():
     return similarity_server.get_sentence_at_id(request.json['id'], input_csv)
@@ -130,6 +146,7 @@ def get_sentence():
 ##      id: integer, the id of the user in query
 ## Returns:
 ##      list of user ids, objectives, and scores
+@cross_origin()
 @app.route('/get_nearest', methods = ['POST'])
 def get_nearest():
     method = request.json['method']
