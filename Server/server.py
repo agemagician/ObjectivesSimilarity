@@ -136,7 +136,8 @@ def generate_models():
 @cross_origin()
 @app.route('/get_sentence', methods = ['POST'])
 def get_sentence():
-    return similarity_server.get_sentence_at_id(request.json['id'], input_csv)
+    sentence =  similarity_server.get_sentence_at_id(request.json['id'], input_csv)
+    return json.dumps({'sentence': sentence})
 
 ## Post Request: Returns the most similar users to the given id
 ## Params:
