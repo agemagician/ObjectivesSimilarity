@@ -1,10 +1,15 @@
-import os.path
+import os
+import shutil
+import sys
 from modules.ext.keyValueHeap import keyValueHeap
 
 
 def assert_can_write_hd5(file_name):
     if os.path.exists(file_name):
-        raise Exception('File Error: {}  already exists.'.format(file_name))
+        try: 
+            os.remove(file_name)
+        except OSError as e:
+            raise Exception('Error while removeing file: {}.'.format(file_name))
 
 
 def assert_row_dim(row_dim, row_key):

@@ -14,7 +14,8 @@ class SimilarityWrapper:
   def __init__(self,
     embeddings_generator: EmbeddingsGenerator,
     similarity_estimator: SimilarityEstimator,
-    output_dir = '/content/drive/My Drive'):
+    output_dir = '/content/drive/My Drive',
+    add_output_prefix = False):
     """
     Server takes an instance of the embeddings generator class, and and instance of the similarity estimator class.
 
@@ -28,7 +29,7 @@ class SimilarityWrapper:
     self.embeddings_generator = embeddings_generator
     self.similarity_estimator = similarity_estimator
     self.output_dir = output_dir
-    self.output_prefix = ''.join(random.choices(string.ascii_uppercase, k=5))
+    self.output_prefix = '' if not add_output_prefix else ''.join(random.choices(string.ascii_uppercase, k=5))
   
   def get_sentence_at_id(self, id, input_csv):
     sentences = pd.read_csv(input_csv)

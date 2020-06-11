@@ -2,6 +2,7 @@ import json
 import os
 import random
 import string
+import pickle
 from flask import Flask, render_template, request, Response
 from flask_cors import CORS, cross_origin
 from werkzeug.utils import secure_filename
@@ -26,6 +27,30 @@ input_csv = os.path.abspath('static/uploads/tinyset.csv')
 
 available_embeddings = similarity_server.get_available_embedding_algorithms()
 available_similarity_metrics = similarity_server.get_available_distance_metrics()
+
+
+def get_indexed():
+    try:
+        with open('indexed_embeddings.pickle', 'rb') as f:
+            indexed_embeddings = pickle.load(f)
+
+    except Exception as e:
+        print(e)
+        indexed_embeddings = {}
+
+    return indexed_embeddings
+
+def add_index(embedding, metric):
+    indexed_embeddings = get_indexed()
+    indexed_embedding = indexed_embeddings.get(embedding, [])
+    indexed_embedding.append(metric)
+    indexed_embeddings[embedding] = indexed_embedding
+
+    with open('indexed_embeddings.pickle', 'wb') as f:
+        print('Writing..', indexed_embeddings)
+        pickle.dump(indexed_embeddings, f)
+
+
 
 @app.after_request
 def after_request(response):
@@ -105,6 +130,25 @@ def get_models():
 def get_metrics():
     return json.dumps(similarity_server.get_available_distance_metrics())
 
+
+## GET Request: Returns the list of supported models
+@cross_origin()
+@app.route('/indexed_models', methods = ['GET'])
+def get_indexed_models():
+    indexed_embeddings = list(get_indexed().keys())
+    return json.dumps(indexed_embeddings)
+
+
+## GET Request: Returns the list of supported distance metrics
+@cross_origin()
+@app.route('/indexed_metrics', methods = ['GET'])
+def get_indexed_metrics():
+    indexed_metrics = list(get_indexed().values())
+    flatten = lambda l: [item for sublist in l for item in sublist]
+    indexed_metrics = list(set(flatten(indexed_metrics)))
+    return json.dumps(indexed_metrics)
+
+
 ## Post Request: Generates Embeddings and Similarity Indices
 ## Params:
 ##      models: list of strings, the models to generate the embeddings for.
@@ -136,7 +180,7 @@ def generate_models():
 @cross_origin()
 @app.route('/get_sentence', methods = ['POST'])
 def get_sentence():
-    sentence =  similarity_server.get_sentence_at_id(request.json['id'], input_csv)
+    sentence =  similarity_server.get_sentence_at_id(int(request.json['id']), input_csv)
     return json.dumps({'sentence': sentence})
 
 ## Post Request: Returns the most similar users to the given id
@@ -152,18 +196,24 @@ def get_sentence():
 def get_nearest():
     method = request.json['method']
     metric = request.json['metric']
-    id = request.json['id']
-    K = request.json['K']
+    id = int(request.json['id'])
+    K = int(request.json['K'])
+    print(method, metric, id, K)
+
     __, nearest = similarity_server.get_most_similar_K_to(id, K, method, metric, input_csv)
     return nearest.to_json()
 
 
-def _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv):
-    output_prefix = ''.join(random.choices(string.ascii_uppercase, k=5))
+def _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv, add_output_prefix=False):
+    output_prefix = ''.join(random.choices(string.ascii_uppercase, k=5)) if add_output_prefix else ''
 
     embedding_files = similarity_server.generate_emeddings_from_csv(input_csv, OUTPUT_DIR, output_prefix, chunk_size, models, id_key, sentence_key)
     for embedding_algorithm, embedding_file in embedding_files.items():
         similarity_server.create_embeddings_index(embedding_file, embedding_algorithm, max_k, metrics)
+
+    for model in models:
+        for metric in metrics:
+            add_index(model, metric)
 
 
 if __name__ == '__main__':
