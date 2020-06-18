@@ -4,6 +4,7 @@ import random
 import string
 import pickle
 from flask import Flask, render_template, request, Response
+from flask_mail import Mail, Message
 from flask_cors import CORS, cross_origin
 from werkzeug.utils import secure_filename
 from modules.EmbeddingsGenerator import EmbeddingsGenerator
@@ -11,6 +12,18 @@ from modules.SimilarityEstimator import SimilarityEstimator
 from modules.SimilarityWrapper import SimilarityWrapper
 
 app = Flask(__name__)
+
+app.config.update(dict(
+    DEBUG = True,
+    MAIL_SERVER = 'smtp.gmail.com',
+    MAIL_PORT = 587,
+    MAIL_USE_TLS = True,
+    MAIL_USE_SSL = False,
+    MAIL_USERNAME = '',
+    MAIL_PASSWORD = '',
+))
+
+mail = Mail(app)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
@@ -50,7 +63,15 @@ def add_index(embedding, metric):
         print('Writing..', indexed_embeddings)
         pickle.dump(indexed_embeddings, f)
 
+@app.route('/email')
+def email():
+    msg = Message("Hello",
+                  sender="from@example.com",
+                  body = ' '.join(similarity_server.get_available_embedding_algorithms()),
+                  recipients=[""])    
 
+    mail.send(msg)
+    return 'OK'
 
 @app.after_request
 def after_request(response):
@@ -196,7 +217,7 @@ def get_sentence():
 def get_nearest():
     method = request.json['method']
     metric = request.json['metric']
-    id = int(request.json['id'])
+    id = request.json['id']
     K = int(request.json['K'])
     print(method, metric, id, K)
 
