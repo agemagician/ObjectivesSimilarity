@@ -3,15 +3,25 @@ import os
 import random
 import string
 import pickle
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, abort
 from flask_mail import Mail, Message
 from flask_cors import CORS, cross_origin
 from werkzeug.utils import secure_filename
 from modules.EmbeddingsGenerator import EmbeddingsGenerator
 from modules.SimilarityEstimator import SimilarityEstimator
 from modules.SimilarityWrapper import SimilarityWrapper
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+db = SQLAlchemy(app)
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(1000))
+    password = db.Column(db.String(1000))
+
 
 app.config.update(dict(
     DEBUG = True,
@@ -63,7 +73,7 @@ def add_index(embedding, metric):
         print('Writing..', indexed_embeddings)
         pickle.dump(indexed_embeddings, f)
 
-@app.route('/email')
+@app.route('/email', methods=['POST'])
 def email():
     msg = Message("Hello",
                   sender="from@example.com",
@@ -72,6 +82,61 @@ def email():
 
     mail.send(msg)
     return 'OK'
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    name = request.form.get('name')
+    password = request.form.get('password')
+
+    user = User.query.filter_by(name=name).first()
+    if not user or not check_password_hash(user.password, password):
+        abort(403)
+
+    return 'OK'
+
+def exclude_from_auth(func):
+    func._exclude_from_auth = True
+    return func
+
+@app.route('/signup', methods=['POST'])
+@exclude_from_auth
+def signup():
+    print('inside Signup')
+    name = request.form.get('name')
+    password = request.form.get('password')
+
+    user = User.query.filter_by(name=name).first()
+    if user:
+        abort(403)
+
+    user = User(name = name, password = generate_password_hash(password, method='sha256'))
+
+    db.session.add(user)
+    db.session.commit()
+
+    return 'OK'
+
+@app.before_request
+def before_callback():
+    print('Here 1')
+    test_auth = True
+
+    if request.endpoint in app.view_functions:
+        view_func = app.view_functions[request.endpoint]
+        test_auth = not hasattr(view_func, '_exclude_from_auth')
+
+    if test_auth:
+        if request.authorization:
+            name = request.authorization.username
+            password = request.authorization.password
+            user = User.query.filter_by(name=name).first()
+
+            if not user or not check_password_hash(user.password, password):
+                abort(401)
+
+        else:
+            abort(401)
+
 
 @app.after_request
 def after_request(response):
@@ -91,7 +156,7 @@ def index():
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     if request.method == 'POST':
-        user_id = int(request.form['id'])
+        user_id = request.form['id']
         K = int(request.form['k'])
         model_name = request.form['embedding']
         similarity_metric = request.form['similarity_metric']
@@ -201,7 +266,7 @@ def generate_models():
 @cross_origin()
 @app.route('/get_sentence', methods = ['POST'])
 def get_sentence():
-    sentence =  similarity_server.get_sentence_at_id(int(request.json['id']), input_csv)
+    sentence =  similarity_server.get_sentence_at_id(request.json['id'], input_csv)
     return json.dumps({'sentence': sentence})
 
 ## Post Request: Returns the most similar users to the given id
