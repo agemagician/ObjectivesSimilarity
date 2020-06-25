@@ -45,8 +45,7 @@ OUTPUT_DIR = os.path.abspath('embeddings')
 embeddingsGenerator = EmbeddingsGenerator(delete_models=False)
 similarityEstimator = SimilarityEstimator(output_dir=OUTPUT_DIR)
 similarity_server = SimilarityWrapper(embeddingsGenerator, similarityEstimator, output_dir=OUTPUT_DIR)
-input_csv = os.path.abspath('static/uploads/tinyset.csv')
-
+input_csv = ''
 
 available_embeddings = similarity_server.get_available_embedding_algorithms()
 available_similarity_metrics = similarity_server.get_available_distance_metrics()
@@ -245,12 +244,18 @@ def get_indexed_metrics():
 @cross_origin()
 @app.route('/generate_models', methods = ['POST'])
 def generate_models():
-    models = request.json['models']
-    metrics = request.json['metrics']
-    max_k = int(request.json['max_k'])
-    chunk_size = int(request.json['chunk_size'])
-    id_key = request.json['id_key']
-    sentence_key = request.json['sentence_key']
+    models = request.form.getlist('models')
+    metrics = request.form.getlist('metrics')
+    max_k = int(request.form['max_k'])
+    chunk_size = int(request.form['chunk_size'])
+    id_key = request.form['id_key']
+    sentence_key = request.form['sentence_key']
+
+    f = request.files['file']
+    file_path = '{}/{}'.format(UPLOAD_FOLDER, secure_filename(f.filename))
+    f.save(file_path)
+    input_csv = file_path
+
 
     print('Generating {} for {}'.format(models, metrics))
     
