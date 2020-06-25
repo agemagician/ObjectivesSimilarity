@@ -50,7 +50,7 @@ class BertModel:
     def init_model(self):
         print('Initializing')
         self.model = hub.KerasLayer(self.url, trainable=self.trainable)
-
+    
         self.tokenizer = self.get_tokenizer()
 
         self.__is_init = True

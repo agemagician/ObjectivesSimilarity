@@ -60,7 +60,7 @@ def get_indexed():
     except Exception as e:
         print(e)
         indexed_embeddings = {}
-
+    print(indexed_embeddings)
     return indexed_embeddings
 
 def add_index(embedding, metric):
@@ -118,7 +118,6 @@ def signup():
 
 @app.before_request
 def before_callback():
-    print('Here 1')
     test_auth = True
 
     if request.endpoint in app.view_functions:
@@ -297,10 +296,13 @@ def _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, i
     for embedding_algorithm, embedding_file in embedding_files.items():
         similarity_server.create_embeddings_index(embedding_file, embedding_algorithm, max_k, metrics)
 
+
+    if os.path.exists('indexed_embeddings.pickle'):
+        os.remove('indexed_embeddings.pickle')
+
     for model in models:
         for metric in metrics:
             add_index(model, metric)
-
 
 if __name__ == '__main__':
    app.run(debug = True)
