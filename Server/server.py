@@ -176,31 +176,6 @@ def upload():
     return render_template('upload.html', embeddings = available_embeddings, similarity_metrics = available_similarity_metrics)
 
 
-## Uploads the csv file which will be used to generate the embeddings
-@cross_origin()
-@app.route('/uploader', methods = ['GET', 'POST'])
-def upload_file():
-    print(request.form)
-    if request.method == 'POST':
-        selected_embeddings = request.form.getlist('embedding')
-        selected_metrics = request.form.getlist('similarity_metric')
-
-        max_k = int(request.form['max_k'])
-        chunk_size = int(request.form['chunk_size'])
-
-        id_key = request.form['id_key']
-        sentence_key = request.form['sentence_key']
-
-        f = request.files['file']
-        file_path = '{}/{}'.format(UPLOAD_FOLDER, secure_filename(f.filename))
-        f.save(file_path)
-        input_csv = file_path
-
-        _generate_models(chunk_size, selected_embeddings, id_key, sentence_key, max_k, selected_metrics, input_csv)
-        # print(chunk_size, selected_embeddings, id_key, sentence_key, max_k, selected_metrics, input_csv)
-        return 'Embeddings Generated Successfully'
-
-
 ## GET Request: Returns the list of supported models
 @cross_origin()
 @app.route('/models', methods = ['GET'])
