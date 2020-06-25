@@ -53,7 +53,7 @@ available_similarity_metrics = similarity_server.get_available_distance_metrics(
 
 def get_indexed():
     try:
-        with open('indexed_embeddings.pickle', 'rb') as f:
+        with open('static/indexed_embeddings.pickle', 'rb') as f:
             indexed_embeddings = pickle.load(f)
 
     except Exception as e:
@@ -68,7 +68,7 @@ def add_index(embedding, metric):
     indexed_embedding.append(metric)
     indexed_embeddings[embedding] = indexed_embedding
 
-    with open('indexed_embeddings.pickle', 'wb') as f:
+    with open('static/indexed_embeddings.pickle', 'wb') as f:
         print('Writing..', indexed_embeddings)
         pickle.dump(indexed_embeddings, f)
 
@@ -277,8 +277,8 @@ def _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, i
         similarity_server.create_embeddings_index(embedding_file, embedding_algorithm, max_k, metrics)
 
 
-    if os.path.exists('indexed_embeddings.pickle'):
-        os.remove('indexed_embeddings.pickle')
+    if os.path.exists('static/indexed_embeddings.pickle'):
+        os.remove('static/indexed_embeddings.pickle')
 
     for model in models:
         for metric in metrics:
