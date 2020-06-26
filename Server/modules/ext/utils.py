@@ -9,7 +9,7 @@ def assert_can_write_hd5(file_name):
         try: 
             os.remove(file_name)
         except OSError as e:
-            raise Exception('Error while removeing file: {}.'.format(file_name))
+            raise Exception('Error while removeing file: {} \n\n Message:{}.'.format(file_name, e))
 
 
 def assert_row_dim(row_dim, row_key):

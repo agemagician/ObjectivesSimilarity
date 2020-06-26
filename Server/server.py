@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import random
 import string
 import pickle
@@ -45,11 +46,34 @@ OUTPUT_DIR = os.path.abspath('embeddings')
 embeddingsGenerator = EmbeddingsGenerator(delete_models=False)
 similarityEstimator = SimilarityEstimator(output_dir=OUTPUT_DIR)
 similarity_server = SimilarityWrapper(embeddingsGenerator, similarityEstimator, output_dir=OUTPUT_DIR)
-input_csv = ''
+
+if os.path.exists('static/uploads/data.csv'):
+    print('Reading Input File')
+    input_csv = 'static/uploads/data.csv'
+    try:
+        with open('static/id_field_name.pickle', 'rb') as f:
+            print('Reading Saved ID Field Name')
+            id_field_name = pickle.load(f)
+
+        with open('static/sentence_field_name.pickle', 'rb') as f:
+            print('Reading Saved Sentence Field Name')
+            sentence_field_name = pickle.load(f)
+
+    except Exception as e:
+        print('Error Resetting Field Names')
+        id_field_name = ''
+        sentence_field_name = ''
+else:
+    print('No Input File')
+    input_csv = ''
 
 available_embeddings = similarity_server.get_available_embedding_algorithms()
 available_similarity_metrics = similarity_server.get_available_distance_metrics()
 
+
+def exclude_from_auth(func):
+    func._exclude_from_auth = True
+    return func
 
 def get_indexed():
     try:
@@ -82,10 +106,12 @@ def email():
     mail.send(msg)
     return 'OK'
 
+@exclude_from_auth
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     name = request.form.get('name')
     password = request.form.get('password')
+    print(name, password)
 
     user = User.query.filter_by(name=name).first()
     if not user or not check_password_hash(user.password, password):
@@ -93,9 +119,6 @@ def login():
 
     return 'OK'
 
-def exclude_from_auth(func):
-    func._exclude_from_auth = True
-    return func
 
 @app.route('/signup', methods=['POST'])
 @exclude_from_auth
@@ -118,6 +141,7 @@ def signup():
 @app.before_request
 def before_callback():
     test_auth = True
+    print(request.endpoint, '----', request.authorization)
 
     if request.endpoint in app.view_functions:
         view_func = app.view_functions[request.endpoint]
@@ -226,18 +250,31 @@ def generate_models():
     id_key = request.form['id_key']
     sentence_key = request.form['sentence_key']
 
+    with open('static/id_field_name.pickle', 'wb') as f:
+        print('Writing ID Field Name..', id_key)
+        pickle.dump(id_key, f)
+
+    with open('static/sentence_field_name.pickle', 'wb') as f:
+        print('Writing Sentence Field Name..', sentence_key)
+        pickle.dump(sentence_key, f)
+
     f = request.files['file']
-    file_path = '{}/{}'.format(UPLOAD_FOLDER, secure_filename(f.filename))
+    file_path = '{}/{}'.format(UPLOAD_FOLDER, secure_filename('data.csv'))
     f.save(file_path)
     input_csv = file_path
 
 
     print('Generating {} for {}'.format(models, metrics))
     
-    print(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv)
-    _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv)
+    try:
+        print(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv)
+        _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv)
 
-    return Response(status=201)
+        response =  Response(status=201)
+    except KeyError:
+        response =  Response(status=422, response=json.dumps({'error': 'Key Error'}), mimetype='application/json')
+
+    return response
 
 ## Post Request: Returns the objective of the given user is
 ## Params:
@@ -245,8 +282,15 @@ def generate_models():
 @cross_origin()
 @app.route('/get_sentence', methods = ['POST'])
 def get_sentence():
-    sentence =  similarity_server.get_sentence_at_id(request.json['id'], input_csv)
-    return json.dumps({'sentence': sentence})
+    try:
+        if input_csv == '':
+            return  Response(status=422, response=json.dumps({'error': 'Generate Embeddings First'}), mimetype='application/json')
+        
+        sentence =  similarity_server.get_sentence_at_id(request.json['id'], input_csv, id_field_name)
+        return json.dumps({'sentence': sentence})
+
+    except KeyError:
+        return Response(status=422, response=json.dumps({'error': 'Key Error'}), mimetype='application/json')
 
 ## Post Request: Returns the most similar users to the given id
 ## Params:
@@ -265,11 +309,17 @@ def get_nearest():
     K = int(request.json['K'])
     print(method, metric, id, K)
 
-    __, nearest = similarity_server.get_most_similar_K_to(id, K, method, metric, input_csv)
-    return nearest.to_json()
-
+    try:
+        __, nearest = similarity_server.get_most_similar_K_to(id, K, method, metric, input_csv, id_field_name)
+        return nearest.to_json()
+    except KeyError:
+        return Response(status=422, response=json.dumps({'error': 'Key Error'}), mimetype='application/json')
 
 def _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv, add_output_prefix=False):
+    if os.path.exists('./embeddings'):
+        shutil.rmtree('./embeddings')
+    os.makedirs('./embeddings')
+
     output_prefix = ''.join(random.choices(string.ascii_uppercase, k=5)) if add_output_prefix else ''
 
     embedding_files = similarity_server.generate_emeddings_from_csv(input_csv, OUTPUT_DIR, output_prefix, chunk_size, models, id_key, sentence_key)

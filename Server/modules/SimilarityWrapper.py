@@ -31,14 +31,14 @@ class SimilarityWrapper:
     self.output_dir = output_dir
     self.output_prefix = '' if not add_output_prefix else ''.join(random.choices(string.ascii_uppercase, k=5))
   
-  def get_sentence_at_id(self, id, input_csv):
+  def get_sentence_at_id(self, id, input_csv, id_field_name):
     sentences = pd.read_csv(input_csv)
-    sentences = sentences.set_index('id')
+    sentences = sentences.set_index(id_field_name)
 
     return sentences.loc[id][0]
 
 
-  def get_most_similar_K_to(self, id, K, model_name, similarity_metric, input_csv):
+  def get_most_similar_K_to(self, id, K, model_name, similarity_metric, input_csv, id_field_name='id'):
     """
     Returns the most similar ids to the given id. Prints the result.
 
@@ -56,11 +56,12 @@ class SimilarityWrapper:
     hdf = pd.HDFStore(h5_file_name)
 
     key = 'key_{}'.format(id)
-    print(K)
-    similar_k = hdf.get(key).head(K).set_index('id')
+    similar_k = hdf.get(key).head(K)
+    similar_k.rename(columns={'id':id_field_name}, inplace=True)
+    similar_k = similar_k.set_index(id_field_name)
 
     sentences = pd.read_csv(input_csv)
-    sentences = sentences.set_index('id')
+    sentences = sentences.set_index(id_field_name)
     
     print(sentences)
     print(similar_k)
