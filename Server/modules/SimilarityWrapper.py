@@ -38,7 +38,7 @@ class SimilarityWrapper:
     return sentences.loc[id][0]
 
 
-  def get_most_similar_K_to(self, id, K, model_name, similarity_metric, input_csv, id_field_name='id'):
+  def get_most_similar_K_to(self, id, K, model_name, similarity_metric, input_csv, id_field_name='id', sentence_field_name='sentence'):
     """
     Returns the most similar ids to the given id. Prints the result.
 
@@ -67,6 +67,7 @@ class SimilarityWrapper:
     print(similar_k)
 
     similar_k = pd.concat([similar_k, sentences], axis=1, join='inner')
+    similar_k.rename(columns={id_field_name:'id', sentence_field_name:'sentence'}, inplace=True)
 
     print(sentences.loc[id][0])
     print(tabulate(similar_k.sort_values('distance')))

@@ -59,10 +59,15 @@ if os.path.exists('static/uploads/data.csv'):
             print('Reading Saved Sentence Field Name')
             sentence_field_name = pickle.load(f)
 
+        with open('static/max_k.pickle', 'rb') as f:
+            print('Reading Saved Max K')
+            max_k = pickle.load(f)
+
     except Exception as e:
         print('Error Resetting Field Names')
         id_field_name = ''
         sentence_field_name = ''
+        max_k = 0
 else:
     print('No Input File')
     input_csv = ''
@@ -180,6 +185,7 @@ def search():
     if request.method == 'POST':
         user_id = request.form['id']
         K = int(request.form['k'])
+        K = K if K < max_k else max_k
         model_name = request.form['embedding']
         similarity_metric = request.form['similarity_metric']
 
@@ -212,6 +218,22 @@ def get_models():
 @app.route('/metrics', methods = ['GET'])
 def get_metrics():
     return json.dumps(similarity_server.get_available_distance_metrics())
+
+
+## GET Request: Returns the list of supported models
+@cross_origin()
+@app.route('/default_models', methods = ['GET'])
+def get_default_models():
+    default_embeddings = ['use']
+    return json.dumps(default_embeddings)
+
+
+## GET Request: Returns the list of supported distance metrics
+@cross_origin()
+@app.route('/default_metrics', methods = ['GET'])
+def get_default_metrics():
+    indexed_metrics = ['cosine']
+    return json.dumps(indexed_metrics)
 
 
 ## GET Request: Returns the list of supported models
@@ -253,10 +275,16 @@ def generate_models():
     with open('static/id_field_name.pickle', 'wb') as f:
         print('Writing ID Field Name..', id_key)
         pickle.dump(id_key, f)
+        id_field_name = id_key
 
     with open('static/sentence_field_name.pickle', 'wb') as f:
         print('Writing Sentence Field Name..', sentence_key)
         pickle.dump(sentence_key, f)
+        sentence_field_name = sentence_key
+
+    with open('static/max_k.pickle', 'wb') as f:
+        print('Writing max k..', sentence_key)
+        pickle.dump(max_k, f)
 
     f = request.files['file']
     file_path = '{}/{}'.format(UPLOAD_FOLDER, secure_filename('data.csv'))
@@ -307,18 +335,20 @@ def get_nearest():
     metric = request.json['metric']
     id = request.json['id']
     K = int(request.json['K'])
+    print('comparing {} with {}'.format(K, max_k))
+    K = K if K < max_k else max_k
     print(method, metric, id, K)
 
     try:
-        __, nearest = similarity_server.get_most_similar_K_to(id, K, method, metric, input_csv, id_field_name)
+        __, nearest = similarity_server.get_most_similar_K_to(id, K, method, metric, input_csv, id_field_name, sentence_field_name)
         return nearest.to_json()
     except KeyError:
         return Response(status=422, response=json.dumps({'error': 'Key Error'}), mimetype='application/json')
 
 def _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv, add_output_prefix=False):
-    if os.path.exists('./embeddings'):
-        shutil.rmtree('./embeddings')
-    os.makedirs('./embeddings')
+    # if os.path.exists('./embeddings'):
+    #     shutil.rmtree('./embeddings')
+    # os.makedirs('./embeddings')
 
     output_prefix = ''.join(random.choices(string.ascii_uppercase, k=5)) if add_output_prefix else ''
 
