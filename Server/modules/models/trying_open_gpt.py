@@ -1,0 +1,11 @@
+from transformers import GPT2Tokenizer, GPT2Model
+import torch
+
+tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+model = GPT2Model.from_pretrained('gpt2')
+
+inputs = tokenizer("Hello, my dog is cute", return_tensors="pt")
+outputs = model(**inputs)
+
+embeddings = outputs[0][0].mean(0)
+print(embeddings)

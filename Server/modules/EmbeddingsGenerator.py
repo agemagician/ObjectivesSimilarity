@@ -11,6 +11,8 @@ from modules.models.Word2VecModel import Word2VecModel
 from modules.models.NNLMModel import NNLMModel
 from modules.models.xlnetModel import xLnetModel
 from modules.models.xlmModel import xlmModel
+from modules.models.gptModel import gptModel
+from modules.models.gpt2Model import gpt2Model
 
 
 from modules.ext.utils import assert_can_write_hd5
@@ -29,6 +31,8 @@ class EmbeddingsGenerator:
                  albert_url='https://tfhub.dev/tensorflow/albert_en_xxlarge/1',
                  xlnet_url = 'xlnet-large-cased',
                  xlm_url = 'xlm-mlm-en-2048',
+                 gpt_url = 'openai-gpt',
+                 gpt2_url = 'gpt2',
                  delete_models=True,
                  verbose = True):
         """
@@ -52,7 +56,9 @@ class EmbeddingsGenerator:
         self.albert_url = albert_url
         self.xlnet_url = xlnet_url
         self.xlm_url = xlm_url
-
+        self.gpt_url = gpt_url
+        self.gpt2_url = gpt2_url
+        
         self.delete_models = delete_models
         self.verbose = verbose
         
@@ -64,7 +70,9 @@ class EmbeddingsGenerator:
             'albert': AlbertModel,
             'elmo': ElmoModel,
             'xlm': xlmModel,
-            'xlnet': xLnetModel
+            'xlnet': xLnetModel,
+            'gpt': gptModel,
+            'gpt2': gpt2Model
         }
 
         self.supported_model_names = list(self.models.keys())
@@ -141,6 +149,8 @@ class EmbeddingsGenerator:
             s = pd.DataFrame(embeds.numpy())
             s[id_key] = chunk[id_key].values
             s = s.set_index(id_key)
+
+            print(s.head())
 
             store.append('chunk_{}'.format(i), s)
 
