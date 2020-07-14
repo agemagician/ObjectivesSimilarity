@@ -45,7 +45,7 @@ OUTPUT_DIR = os.path.abspath('embeddings')
 ## Setup
 embeddingsGenerator = EmbeddingsGenerator(delete_models=False)
 similarityEstimator = SimilarityEstimator(output_dir=OUTPUT_DIR)
-similarity_server = SimilarityWrapper(embeddingsGenerator, similarityEstimator, output_dir=OUTPUT_DIR)
+similarityWrapper = SimilarityWrapper(embeddingsGenerator, similarityEstimator, output_dir=OUTPUT_DIR)
 
 if os.path.exists('static/uploads/data.csv'):
     print('Reading Input File')
@@ -72,8 +72,8 @@ else:
     print('No Input File')
     input_csv = ''
 
-available_embeddings = similarity_server.get_available_embedding_algorithms()
-available_similarity_metrics = similarity_server.get_available_distance_metrics()
+available_embeddings = similarityWrapper.get_available_embedding_algorithms()
+available_similarity_metrics = similarityWrapper.get_available_distance_metrics()
 
 
 def exclude_from_auth(func):
@@ -105,7 +105,7 @@ def add_index(embedding, metric):
 def email():
     msg = Message("Hello",
                   sender="from@example.com",
-                  body = ' '.join(similarity_server.get_available_embedding_algorithms()),
+                  body = ' '.join(similarityWrapper.get_available_embedding_algorithms()),
                   recipients=[""])    
 
     mail.send(msg)
@@ -191,7 +191,7 @@ def search():
 
         print(similarity_metric, model_name)
 
-        sentence, similar = similarity_server.get_most_similar_K_to(user_id, K, model_name, similarity_metric, input_csv)
+        sentence, similar = similarityWrapper.get_most_similar_K_to(user_id, K, model_name, similarity_metric, input_csv)
         
         print(similar.keys())
         
@@ -210,14 +210,14 @@ def upload():
 @cross_origin()
 @app.route('/models', methods = ['GET'])
 def get_models():
-    return json.dumps(similarity_server.get_available_embedding_algorithms())
+    return json.dumps(similarityWrapper.get_available_embedding_algorithms())
 
 
 ## GET Request: Returns the list of supported distance metrics
 @cross_origin()
 @app.route('/metrics', methods = ['GET'])
 def get_metrics():
-    return json.dumps(similarity_server.get_available_distance_metrics())
+    return json.dumps(similarityWrapper.get_available_distance_metrics())
 
 
 ## GET Request: Returns the list of supported models
@@ -299,7 +299,8 @@ def generate_models():
         _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv)
 
         response =  Response(status=201)
-    except KeyError:
+    except KeyError as e:
+        print(e)
         response =  Response(status=422, response=json.dumps({'error': 'Key Error'}), mimetype='application/json')
 
     return response
@@ -314,7 +315,7 @@ def get_sentence():
         if input_csv == '':
             return  Response(status=422, response=json.dumps({'error': 'Generate Embeddings First'}), mimetype='application/json')
         
-        sentence =  similarity_server.get_sentence_at_id(request.json['id'], input_csv, id_field_name)
+        sentence =  similarityWrapper.get_sentence_at_id(request.json['id'], input_csv, id_field_name)
         return json.dumps({'sentence': sentence})
 
     except KeyError:
@@ -340,8 +341,12 @@ def get_nearest():
     print(method, metric, id, K)
 
     try:
-        __, nearest = similarity_server.get_most_similar_K_to(id, K, method, metric, input_csv, id_field_name, sentence_field_name)
-        return nearest.to_json()
+        __, nearest = similarityWrapper.get_most_similar_K_to(id, K, method, metric, input_csv, id_field_name, sentence_field_name)
+        nearest = nearest.to_dict()
+        nearest['userObjective'] = similarityWrapper.get_sentence_at_id(id, input_csv, id_field_name)
+        nearest['commonWords'] = ['and']
+
+        return json.dumps(nearest)
     except KeyError:
         return Response(status=422, response=json.dumps({'error': 'Key Error'}), mimetype='application/json')
 
@@ -352,9 +357,9 @@ def _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, i
 
     output_prefix = ''.join(random.choices(string.ascii_uppercase, k=5)) if add_output_prefix else ''
 
-    embedding_files = similarity_server.generate_emeddings_from_csv(input_csv, OUTPUT_DIR, output_prefix, chunk_size, models, id_key, sentence_key)
+    embedding_files = similarityWrapper.generate_emeddings_from_csv(input_csv, OUTPUT_DIR, output_prefix, chunk_size, models, id_key, sentence_key)
     for embedding_algorithm, embedding_file in embedding_files.items():
-        similarity_server.create_embeddings_index(embedding_file, embedding_algorithm, max_k, metrics)
+        similarityWrapper.create_embeddings_index(embedding_file, embedding_algorithm, max_k, metrics)
 
 
     if os.path.exists('static/indexed_embeddings.pickle'):
