@@ -11,6 +11,7 @@ from werkzeug.utils import secure_filename
 from modules.EmbeddingsGenerator import EmbeddingsGenerator
 from modules.SimilarityEstimator import SimilarityEstimator
 from modules.SimilarityWrapper import SimilarityWrapper
+from modules.Stemmer import get_common_words
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -341,13 +342,19 @@ def get_nearest():
     print(method, metric, id, K)
 
     try:
+        user_objective = similarityWrapper.get_sentence_at_id(id, input_csv, id_field_name)
         __, nearest = similarityWrapper.get_most_similar_K_to(id, K, method, metric, input_csv, id_field_name, sentence_field_name)
+        
         nearest = nearest.to_dict()
-        nearest['userObjective'] = similarityWrapper.get_sentence_at_id(id, input_csv, id_field_name)
-        nearest['commonWords'] = ['and']
+        all_objectives = list(nearest['sentence'].values())
+        all_objectives.append(user_objective)
+
+        nearest['userObjective'] = user_objective
+        nearest['commonWords'] = get_common_words(all_objectives)
 
         return json.dumps(nearest)
-    except KeyError:
+    except KeyError as e:
+        print(e)
         return Response(status=422, response=json.dumps({'error': 'Key Error'}), mimetype='application/json')
 
 def _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv, add_output_prefix=False):
