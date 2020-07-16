@@ -34,8 +34,6 @@ class gptModel:
 
     def init_model(self):
         print('{}: Initializing'.format(self.model_name))
-        # self.tokenizer = OpenAIGPTTokenizer.from_pretrained(self.url)
-        # self.model = OpenAIGPTModel.from_pretrained(self.url)
         self.tokenizer = OpenAIGPTTokenizer.from_pretrained('openai-gpt')
         self.model = OpenAIGPTModel.from_pretrained('openai-gpt')
         self.__is_init = True
