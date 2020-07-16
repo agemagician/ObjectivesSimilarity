@@ -12,9 +12,11 @@ from modules.EmbeddingsGenerator import EmbeddingsGenerator
 from modules.SimilarityEstimator import SimilarityEstimator
 from modules.SimilarityWrapper import SimilarityWrapper
 from modules.Stemmer import get_common_words
+from modules.TfIdf import TfIdf
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 
+tfIdf_model = TfIdf()
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db = SQLAlchemy(app)
@@ -304,6 +306,8 @@ def generate_models():
         print(e)
         response =  Response(status=422, response=json.dumps({'error': 'Key Error'}), mimetype='application/json')
 
+    tfIdf_model.fit(input_csv, sentence_key)
+
     return response
 
 ## Post Request: Returns the objective of the given user is
@@ -351,6 +355,9 @@ def get_nearest():
 
         nearest['userObjective'] = user_objective
         nearest['commonWords'] = get_common_words(all_objectives)
+
+        important_words = tfIdf_model.get_keys(all_objectives)
+        print(important_words)
 
         return json.dumps(nearest)
     except KeyError as e:
