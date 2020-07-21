@@ -1,0 +1,10 @@
+,method,metric,score
+0,elmo,cosine,5.008394783256397
+0,elmo,minkowski,4.794356009830935
+0,elmo,correlation,5.011331245742602
+0,elmo,cityblock,4.787425873793076
+0,elmo,sqeuclidean,5.1440315103697305
+0,elmo,euclidean,4.794356009830935
+0,elmo,chebyshev,4.872532987940524
+0,elmo,canberra,6.489577196629381
+0,elmo,braycurtis,4.556741761712348

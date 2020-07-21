@@ -90,7 +90,7 @@ class EmbeddingsGenerator:
 
         Returns: [list]
         """
-        return self.supported_model_names
+        return self.supported_model_names[:]
 
 
     def save_embeddings_for_csv(self, input_csv, output_dir, output_prefix='', chunk_size=100, model_names=None, id_key= 'id', sentence_key= 'sentence'):

@@ -288,3 +288,8 @@ class SimilarityEstimator:
         similarities = 1 - minmax_scale(distances)
         similarity_matrix = similarities.reshape(len(data), len(data))
         return similarity_matrix
+
+    def calculate_pair_distances(self, embeddings_1, embeddings_2, distance_metric):
+      distance_function = self.distances[distance_metric]
+      distances = [distance_function(list(embedding_1), list(embedding_2)) for (embedding_1, embedding_2) in zip(embeddings_1, embeddings_2)]
+      return 1 - minmax_scale(distances, feature_range=(0,1))

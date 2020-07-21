@@ -1,0 +1,10 @@
+,method,metric,score
+0,gpt,cosine,4.376096413097337
+0,gpt,minkowski,5.208891920974548
+0,gpt,correlation,4.376201551694444
+0,gpt,cityblock,5.257376254393455
+0,gpt,sqeuclidean,4.582068628314803
+0,gpt,euclidean,5.208891920974548
+0,gpt,chebyshev,5.0941516264255835
+0,gpt,canberra,7.323912595987221
+0,gpt,braycurtis,4.857921722187649

@@ -355,11 +355,10 @@ def get_nearest():
 
         nearest['userObjective'] = user_objective
         nearest['commonWords'] = get_common_words(all_objectives)
-
-        important_words = tfIdf_model.get_keys(all_objectives)
-        print(important_words)
+        nearest['importantWords'] = tfIdf_model.get_keys(all_objectives, n=5)
 
         return json.dumps(nearest)
+        
     except KeyError as e:
         print(e)
         return Response(status=422, response=json.dumps({'error': 'Key Error'}), mimetype='application/json')
