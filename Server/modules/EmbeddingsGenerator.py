@@ -14,7 +14,9 @@ from modules.models.xlmModel import xlmModel
 from modules.models.gptModel import gptModel
 from modules.models.gpt2Model import gpt2Model
 from modules.models.reformerModel import reformerModel
-
+from modules.models.T5_Model import T5_Model
+from modules.models.Electra_Model import Electra_Model
+from modules.models.DistilBertModel import DistilbertModel
 
 
 from modules.ext.utils import assert_can_write_hd5
@@ -36,6 +38,9 @@ class EmbeddingsGenerator:
                  gpt_url = 'openai-gpt',
                  gpt2_url = 'gpt2',
                  reformer_url = 'google/reformer-crime-and-punishment',
+                 distilbert_url = 'distilbert-base-uncased',
+                 electra_url = 'google/electra-small-discriminator',
+                 t5_url = 't5-large',
                  delete_models=True,
                  verbose = True):
         """
@@ -62,6 +67,9 @@ class EmbeddingsGenerator:
         self.gpt_url = gpt_url
         self.gpt2_url = gpt2_url
         self.reformer_url = reformer_url
+        self.distilbert_url = distilbert_url
+        self.electra_url = electra_url
+        self.t5_url = t5_url
 
         self.delete_models = delete_models
         self.verbose = verbose
@@ -78,6 +86,9 @@ class EmbeddingsGenerator:
             'gpt': gptModel,
             'gpt2': gpt2Model,
             'reformer': reformerModel,
+            'distilbert': DistilbertModel,
+            'electra': Electra_Model,
+            't5': T5_Model       
         }
 
         self.supported_model_names = list(self.models.keys())
