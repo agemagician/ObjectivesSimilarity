@@ -7,7 +7,7 @@ class T5_Model:
     Set Up Requried Objects For a gpt Model From Hugging Face
     '''
 
-    def __init__(self, model_name='T5', URL='t5-large', delete_models=True):
+    def __init__(self, model_name='T5', URL='t5-small', delete_models=True):
 
         self.url = URL
         self.model_name = model_name
@@ -34,8 +34,8 @@ class T5_Model:
 
     def init_model(self):
         print('{}: Initializing'.format(self.model_name))
-        self.tokenizer = T5Tokenizer.from_pretrained('t5-large')
-        self.model = T5Model.from_pretrained('t5-large')
+        self.tokenizer = T5Tokenizer.from_pretrained(self.url)
+        self.model = T5Model.from_pretrained(self.url)
         self.__is_init = True
 
     def __embed(self, sentence):

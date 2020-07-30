@@ -34,8 +34,8 @@ class DistilbertModel:
 
     def init_model(self):
         print('{}: Initializing'.format(self.model_name))
-        self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
-        self.model = DistilBertModel.from_pretrained("distilbert-base-uncased")
+        self.tokenizer = DistilBertTokenizer.from_pretrained(self.url)
+        self.model = DistilBertModel.from_pretrained(self.url)
         self.__is_init = True
 
     def __embed(self, sentence):

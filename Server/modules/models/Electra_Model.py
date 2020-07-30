@@ -34,8 +34,8 @@ class Electra_Model:
 
     def init_model(self):
         print('{}: Initializing'.format(self.model_name))
-        self.tokenizer = ElectraTokenizer.from_pretrained('google/electra-small-discriminator')
-        self.model = ElectraModel.from_pretrained('google/electra-small-discriminator')
+        self.tokenizer = ElectraTokenizer.from_pretrained(self.url)
+        self.model = ElectraModel.from_pretrained(self.url)
         self.__is_init = True
 
     def __embed(self, sentence):

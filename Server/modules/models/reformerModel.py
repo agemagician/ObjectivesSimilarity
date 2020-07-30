@@ -34,8 +34,8 @@ class reformerModel:
 
     def init_model(self):
         print('{}: Initializing'.format(self.model_name))
-        self.tokenizer = ReformerTokenizer.from_pretrained('google/reformer-crime-and-punishment')
-        self.model = ReformerModel.from_pretrained('google/reformer-crime-and-punishment')
+        self.tokenizer = ReformerTokenizer.from_pretrained(self.url)
+        self.model = ReformerModel.from_pretrained(self.url)
         self.__is_init = True
 
     def __embed(self, sentence):

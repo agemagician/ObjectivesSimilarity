@@ -17,6 +17,8 @@ from modules.models.reformerModel import reformerModel
 from modules.models.T5_Model import T5_Model
 from modules.models.Electra_Model import Electra_Model
 from modules.models.DistilBertModel import DistilbertModel
+from modules.models.SentenceTransformers import SentenceBert, SentenceRoBerta, SentenceDistilBert
+from modules.models.Roberta_Model import Roberta_Model
 
 
 from modules.ext.utils import assert_can_write_hd5
@@ -41,6 +43,10 @@ class EmbeddingsGenerator:
                  distilbert_url = 'distilbert-base-uncased',
                  electra_url = 'google/electra-small-discriminator',
                  t5_url = 't5-large',
+                 sentence_bert_url = 'bert-large-nli-stsb-mean-tokens',
+                 sentence_roberta_url = 'roberta-large-nli-stsb-mean-tokens',
+                 sentence_distilbert_url = 'distilbert-base-nli-stsb-mean-tokens',
+                 roberta_url = 'roberta-base',
                  delete_models=True,
                  verbose = True):
         """
@@ -70,6 +76,10 @@ class EmbeddingsGenerator:
         self.distilbert_url = distilbert_url
         self.electra_url = electra_url
         self.t5_url = t5_url
+        self.sentence_bert_url = sentence_bert_url
+        self.sentence_roberta_url = sentence_roberta_url
+        self.sentence_distilbert_url = sentence_distilbert_url
+        self.roberta_url = roberta_url
 
         self.delete_models = delete_models
         self.verbose = verbose
@@ -88,7 +98,11 @@ class EmbeddingsGenerator:
             'reformer': reformerModel,
             'distilbert': DistilbertModel,
             'electra': Electra_Model,
-            't5': T5_Model       
+            't5': T5_Model, 
+            'sentence_bert': SentenceBert,
+            'sentence_roberta': SentenceRoBerta,
+            'sentence_distilbert': SentenceDistilBert,
+            'roberta': Roberta_Model
         }
 
         self.supported_model_names = list(self.models.keys())
