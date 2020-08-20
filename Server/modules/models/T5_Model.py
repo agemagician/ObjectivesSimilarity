@@ -34,14 +34,18 @@ class T5_Model:
 
     def init_model(self):
         print('{}: Initializing'.format(self.model_name))
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.tokenizer = T5Tokenizer.from_pretrained(self.url)
-        self.model = T5Model.from_pretrained(self.url)
+        self.model = T5Model.from_pretrained(self.url).to(self.device)
+        self.model.eval()
         self.__is_init = True
 
     def __embed(self, sentence):
-        inputs_ids = self.tokenizer.encode(sentence, return_tensors='pt')
-        outputs = self.model(input_ids=inputs_ids, decoder_input_ids=inputs_ids)
+        with torch.no_grad():
 
-        embeddings = outputs[0][0].mean(0)
+            inputs_ids = self.tokenizer.encode(sentence, return_tensors='pt').to(self.device)
+            outputs = self.model(input_ids=inputs_ids, decoder_input_ids=inputs_ids)
 
-        return embeddings
+            embeddings = outputs[0][0].mean(0)
+
+            return embeddings

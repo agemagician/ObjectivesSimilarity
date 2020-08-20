@@ -15,6 +15,7 @@ from modules.Stemmer import get_common_words
 from modules.TfIdf import TfIdf
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
+from modules.CommonNgrams import common_ngrams, common_ngram_txt
 
 tfIdf_model = TfIdf()
 app = Flask(__name__)
@@ -25,6 +26,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(1000))
     password = db.Column(db.String(1000))
+    isAdminUser = db.Column(db.Boolean)
 
 
 app.config.update(dict(
@@ -125,7 +127,7 @@ def login():
     if not user or not check_password_hash(user.password, password):
         abort(403)
 
-    return 'OK'
+    return json.dumps({'isAdminUser': True})
 
 
 @app.route('/signup', methods=['POST'])
@@ -134,12 +136,13 @@ def signup():
     print('inside Signup')
     name = request.form.get('name')
     password = request.form.get('password')
+    isAdminUser = bool(int(request.form.get('isAdminUser')))
 
     user = User.query.filter_by(name=name).first()
     if user:
         abort(403)
 
-    user = User(name = name, password = generate_password_hash(password, method='sha256'))
+    user = User(name = name, password = generate_password_hash(password, method='sha256'), isAdminUser=isAdminUser)
 
     db.session.add(user)
     db.session.commit()
@@ -351,11 +354,17 @@ def get_nearest():
         
         nearest = nearest.to_dict()
         all_objectives = list(nearest['sentence'].values())
-        all_objectives.append(user_objective)
 
         nearest['userObjective'] = user_objective
-        nearest['commonWords'] = get_common_words(all_objectives)
-        nearest['importantWords'] = tfIdf_model.get_keys(all_objectives, n=5)
+        # nearest['commonWords'] = get_common_words(all_objectives)
+        l1 =  common_ngram_txt(user_objective, all_objectives) + common_ngram_txt(user_objective, all_objectives, size=3) + common_ngram_txt(user_objective, all_objectives, size=4)
+
+        all_objectives.append(user_objective)
+        # l2 = tfIdf_model.get_keys(all_objectives, n=20) + common_ngrams(all_objectives)
+        l2 = tfIdf_model.get_keys(all_objectives, n=10)
+
+        nearest['importantWords'] = l1
+        nearest['commonWords'] = l2
 
         return json.dumps(nearest)
         

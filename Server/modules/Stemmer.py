@@ -3,6 +3,8 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem import PorterStemmer
 from collections import defaultdict
 from nltk.corpus import stopwords 
+from collections import Counter
+from nltk import ngrams
 import string
 
 nltk.download('punkt')
@@ -29,7 +31,6 @@ def stemSentence(sentence, stem_word_map):
   
 
 def get_common_words(objectives):
-    print('oBjectives are :::::::::::::::::::::::::::::::::::::::::::::::: ', objectives)
     stem_word_map = defaultdict(set)
     all_unique_stems = []
     for objective in objectives:

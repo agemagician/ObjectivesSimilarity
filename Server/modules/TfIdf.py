@@ -5,7 +5,7 @@ import pandas as pd
 class TfIdf():
 
   def __init__(self):    
-    self.tfidf = TfidfVectorizer(stop_words='english')
+    self.tfidf = TfidfVectorizer(stop_words='english', ngram_range=(2,5))
 
   
   def fit(self, data_file, objective_key):
@@ -20,4 +20,8 @@ class TfIdf():
 
     top_n = feature_array[tfidf_sorting][:n]
 
-    return top_n.tolist()
+    # print('Top {} Important Words'.format(n))
+    # print(top_n)
+
+    expanded_list = [i for item in top_n.tolist() for i in item.split()]
+    return expanded_list
