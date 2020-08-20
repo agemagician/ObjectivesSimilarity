@@ -63,14 +63,8 @@ class SimilarityWrapper:
     sentences = pd.read_csv(input_csv)
     sentences = sentences.set_index(id_field_name)
     
-    print(sentences)
-    print(similar_k)
-
     similar_k = pd.concat([similar_k, sentences], axis=1, join='inner')
     similar_k.rename(columns={id_field_name:'id', sentence_field_name:'sentence'}, inplace=True)
-
-    print(sentences.loc[id][0])
-    print(tabulate(similar_k.sort_values('distance')))
 
     return (sentences.loc[id], similar_k.sort_values('distance'))    
 

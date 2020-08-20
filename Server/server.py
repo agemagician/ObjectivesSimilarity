@@ -93,7 +93,6 @@ def get_indexed():
     except Exception as e:
         print(e)
         indexed_embeddings = {}
-    print(indexed_embeddings)
     return indexed_embeddings
 
 def add_index(embedding, metric):
@@ -103,7 +102,6 @@ def add_index(embedding, metric):
     indexed_embeddings[embedding] = indexed_embedding
 
     with open('static/indexed_embeddings.pickle', 'wb') as f:
-        print('Writing..', indexed_embeddings)
         pickle.dump(indexed_embeddings, f)
 
 @app.route('/email', methods=['POST'])
@@ -121,22 +119,20 @@ def email():
 def login():
     name = request.form.get('name')
     password = request.form.get('password')
-    print(name, password)
 
     user = User.query.filter_by(name=name).first()
     if not user or not check_password_hash(user.password, password):
         abort(403)
 
-    return json.dumps({'isAdminUser': True})
+    return json.dumps({'isAdminUser': user.isAdminUser})
 
 
 @app.route('/signup', methods=['POST'])
 @exclude_from_auth
 def signup():
-    print('inside Signup')
     name = request.form.get('name')
     password = request.form.get('password')
-    isAdminUser = bool(int(request.form.get('isAdminUser')))
+    isAdminUser = True if (request.form.get('isAdminUser')) == 'true' else False
 
     user = User.query.filter_by(name=name).first()
     if user:
@@ -152,7 +148,6 @@ def signup():
 @app.before_request
 def before_callback():
     test_auth = True
-    print(request.endpoint, '----', request.authorization)
 
     if request.endpoint in app.view_functions:
         view_func = app.view_functions[request.endpoint]
@@ -195,11 +190,7 @@ def search():
         model_name = request.form['embedding']
         similarity_metric = request.form['similarity_metric']
 
-        print(similarity_metric, model_name)
-
         sentence, similar = similarityWrapper.get_most_similar_K_to(user_id, K, model_name, similarity_metric, input_csv)
-        
-        print(similar.keys())
         
         return render_template('search.html', obj = sentence, similar=similar, embeddings= available_embeddings, similarity_metrics = available_similarity_metrics)
     else:
@@ -357,14 +348,14 @@ def get_nearest():
 
         nearest['userObjective'] = user_objective
         # nearest['commonWords'] = get_common_words(all_objectives)
-        l1 =  common_ngram_txt(user_objective, all_objectives) + common_ngram_txt(user_objective, all_objectives, size=3) + common_ngram_txt(user_objective, all_objectives, size=4)
+        l1 =  common_ngram_txt([user_objective], all_objectives, size=1) + common_ngram_txt([user_objective], all_objectives, size=2) + common_ngram_txt([user_objective], all_objectives, size=3)
 
         all_objectives.append(user_objective)
         # l2 = tfIdf_model.get_keys(all_objectives, n=20) + common_ngrams(all_objectives)
-        l2 = tfIdf_model.get_keys(all_objectives, n=10)
+        l2 = tfIdf_model.get_keys(all_objectives, n=20)
 
-        nearest['importantWords'] = l1
-        nearest['commonWords'] = l2
+        nearest['importantWords'] = l2
+        nearest['commonWords'] = l1
 
         return json.dumps(nearest)
         

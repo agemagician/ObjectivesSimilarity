@@ -180,8 +180,6 @@ class EmbeddingsGenerator:
             s[id_key] = chunk[id_key].values
             s = s.set_index(id_key)
 
-            print(s.head())
-
             store.append('chunk_{}'.format(i), s)
 
         store.close()
