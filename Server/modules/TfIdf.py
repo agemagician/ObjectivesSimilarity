@@ -5,7 +5,7 @@ import pandas as pd
 class TfIdf():
 
   def __init__(self):    
-    self.tfidf = TfidfVectorizer(stop_words='english', ngram_range=(2,3))
+    self.tfidf = TfidfVectorizer(stop_words='english', ngram_range=(1,3))
 
   
   def fit(self, data_file, objective_key):

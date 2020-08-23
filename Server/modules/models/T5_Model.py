@@ -30,7 +30,7 @@ class T5_Model:
             del self.tokenizer
             self.__is_init = False
 
-        return embeddings.detach()
+        return embeddings.cpu()
 
     def init_model(self):
         print('{}: Initializing'.format(self.model_name))

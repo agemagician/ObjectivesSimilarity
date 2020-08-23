@@ -34,8 +34,6 @@ def tokenize(sentences):
     return token_words
 
 def common_ngram_txt(base, results, size=2):
-    print('############ Base is ', base)
-    print('############ Resutls is ', results)
     tokens1 = tokenize(base)
     tokens2 = tokenize(results)
 
@@ -45,5 +43,6 @@ def common_ngram_txt(base, results, size=2):
     match=set.intersection(ng1,ng2)
  
     match = list(match)
-    print('############ Match is ', match)
+    match = [' '.join(match_i) for match_i in match]
+
     return match

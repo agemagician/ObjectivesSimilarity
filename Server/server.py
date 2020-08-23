@@ -4,6 +4,7 @@ import shutil
 import random
 import string
 import pickle
+import numpy as np
 from flask import Flask, render_template, request, Response, abort
 from flask_mail import Mail, Message
 from flask_cors import CORS, cross_origin
@@ -80,6 +81,47 @@ else:
 available_embeddings = similarityWrapper.get_available_embedding_algorithms()
 available_similarity_metrics = similarityWrapper.get_available_distance_metrics()
 
+def remove_substring_duplicates(sentences):
+  filtered_sentences = []
+  for sentence_A in sentences:
+    found = False
+    for sentence_B in sentences:
+      if sentence_B == sentence_A:
+        continue
+
+      if sentence_A in sentence_B:
+        found = True
+        break
+
+    if not found:
+      filtered_sentences.append(sentence_A)
+
+  return filtered_sentences
+
+
+def get_sentence_variants(sentence):
+  upper = sentence.upper()
+  lower = sentence.lower()
+  title = sentence.title()
+  return [upper, lower, title]
+
+def generate_list_variants(sentences):
+  sentences_variants = []
+  for sentence in sentences:
+    if len(sentence) > 4:
+        continue
+
+    sentence_variants = get_sentence_variants(sentence)
+    sentences_variants.extend(sentence_variants)
+
+  sentences_variants.extend(sentences)
+  return list(set(sentences_variants))
+
+def upper_case_abbreviations(sentences):
+    return [sentence.upper() if len(sentence) <= 3 and sentence != 'new' else sentence for sentence in sentences ]
+
+def remove_single_letter(sentences):
+    return [sentence for sentence in sentences if len(sentence) > 1]
 
 def exclude_from_auth(func):
     func._exclude_from_auth = True
@@ -344,18 +386,59 @@ def get_nearest():
         __, nearest = similarityWrapper.get_most_similar_K_to(id, K, method, metric, input_csv, id_field_name, sentence_field_name)
         
         nearest = nearest.to_dict()
-        all_objectives = list(nearest['sentence'].values())
+        other_objectives = list(nearest['sentence'].values())
+
+        for key, value in nearest['sentence'].items():
+            nearest['sentence'][key] = ' '.join(value.split())
+        user_objective = ' '.join(user_objective.split())
+
+        # other_objectives = [objective.lower() for objective in other_objectives]
+        print(other_objectives)
+        # nearest['sentence'] = other_objectives
 
         nearest['userObjective'] = user_objective
-        # nearest['commonWords'] = get_common_words(all_objectives)
-        l1 =  common_ngram_txt([user_objective], all_objectives, size=1) + common_ngram_txt([user_objective], all_objectives, size=2) + common_ngram_txt([user_objective], all_objectives, size=3)
+        
+        # l1 += common_ngram_txt([user_objective], other_objectives, size=1)
+        l1 = set()
+        for other_objective in other_objectives:
+            l_1 =  common_ngram_txt([user_objective], [other_objective], size=2) + common_ngram_txt([user_objective], [other_objective], size=3) + common_ngram_txt([user_objective], [other_objective], size=4)
+            
+            if len(l_1) < 2:
+                print('Extending L_1')
+                l_1 += common_ngram_txt([user_objective], [other_objective], size = 1)[:3]
+                
+                if len(l_1) < 4:
+                    print('Again Extending L_1')
+                    l_1 += get_common_words([user_objective] + [other_objective])[:3]
+            
+            if len(l_1) >= 6:
+                l_1.sort(key=len, reverse=True)
+                print(l_1)
+                l_1 = l_1[:6]
 
-        all_objectives.append(user_objective)
-        # l2 = tfIdf_model.get_keys(all_objectives, n=20) + common_ngrams(all_objectives)
-        l2 = tfIdf_model.get_keys(all_objectives, n=20)
+            for l__1 in l_1:
+                if l__1.lower() not in l1 and l__1.upper() not in l1:
+                    l1.add(l__1)
+        
+        # l1 = [l.lower() for l in l1]
+        
 
-        nearest['importantWords'] = l2
-        nearest['commonWords'] = l1
+        all_objectives = other_objectives + [user_objective]
+        l2 = tfIdf_model.get_keys(all_objectives, n=40)
+        l2 = remove_substring_duplicates(l2)
+        # l2 = [l.lower() for l in l2]
+
+        l1 = [l.title() for l in l1]
+        l2 = [l.title() for l in l2]
+        l1 = remove_substring_duplicates(l1)
+
+        nearest['importantWords'] = np.unique(remove_single_letter(upper_case_abbreviations(l2))).tolist()
+        nearest['commonWords'] = np.unique(remove_single_letter(upper_case_abbreviations(l1))).tolist()
+ 
+        # nearest['importantWords'] = generate_list_variants(l2)
+        # nearest['commonWords'] = generate_list_variants(l1)
+
+        # generate_list_variants
 
         return json.dumps(nearest)
         
