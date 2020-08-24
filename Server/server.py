@@ -392,6 +392,9 @@ def get_nearest():
             nearest['sentence'][key] = ' '.join(value.split())
         user_objective = ' '.join(user_objective.split())
 
+        for key, value in nearest['distance'].items():
+            nearest['distance'][key] = int((1 - nearest['distance'][key] ) * 100)
+
         # other_objectives = [objective.lower() for objective in other_objectives]
         print(other_objectives)
         # nearest['sentence'] = other_objectives
