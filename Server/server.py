@@ -29,6 +29,7 @@ class User(db.Model):
     password = db.Column(db.String(1000))
     isAdminUser = db.Column(db.Boolean)
 
+db.create_all()
 
 app.config.update(dict(
     DEBUG = True,
@@ -428,12 +429,12 @@ def get_nearest():
 
         all_objectives = other_objectives + [user_objective]
         l2 = tfIdf_model.get_keys(all_objectives, n=40)
-        l2 = remove_substring_duplicates(l2)
+        # l2 = remove_substring_duplicates(l2)
         # l2 = [l.lower() for l in l2]
 
         l1 = [l.title() for l in l1]
         l2 = [l.title() for l in l2]
-        l1 = remove_substring_duplicates(l1)
+        # l1 = remove_substring_duplicates(l1)
 
         nearest['importantWords'] = np.unique(remove_single_letter(upper_case_abbreviations(l2))).tolist()
         nearest['commonWords'] = np.unique(remove_single_letter(upper_case_abbreviations(l1))).tolist()
@@ -446,6 +447,7 @@ def get_nearest():
         return json.dumps(nearest)
         
     except KeyError as e:
+        print('Erorrrrrrrrrr')
         print(e)
         return Response(status=422, response=json.dumps({'error': 'Key Error'}), mimetype='application/json')
 

@@ -1,0 +1,287 @@
+[33mcommit d2186dc062026a3eb0335dbb1b60db7a96a64223[m[33m ([m[1;36mHEAD -> [m[1;32mObjectivesSimilarity[m[33m)[m
+Author: ge39god <ge39god@mytum.de>
+Date:   Mon Aug 24 10:36:00 2020 +0200
+
+    Changing Distance To Similarity
+
+[33mcommit f20f39e0a9cebf5fb9091ee99d1d9a9562ac0342[m
+Author: ge39god <ge39god@mytum.de>
+Date:   Sun Aug 23 21:14:33 2020 +0200
+
+    Before Demo
+
+[33mcommit 744307acff90e3109bcc422107a9e57d60b8bc05[m
+Author: ge39god <ge39god@mytum.de>
+Date:   Thu Aug 20 21:08:05 2020 +0200
+
+    Removing Unused Prints
+
+[33mcommit 7d3d90f8a7349354dea3ea62fcf08de23f5293fd[m
+Author: ge39god <ge39god@mytum.de>
+Date:   Thu Aug 20 19:40:24 2020 +0200
+
+    Cross Origin Error Again
+
+[33mcommit 19972c13656f5e134e1d3d185d02da3b6ed1630a[m
+Author: ge39god <ge39god@mytum.de>
+Date:   Thu Jul 30 23:46:51 2020 +0200
+
+    Adding Models
+
+[33mcommit f0124d6c0f2e617549d0a8a810b4398e3a7d72a8[m
+Author: ge39god <ge39god@mytum.de>
+Date:   Wed Jul 29 23:20:22 2020 +0200
+
+    Adding TFHub Modules
+
+[33mcommit 91fc9028cf0f3b099b37c7d956a72c592f54e0d9[m
+Author: ge39god <ge39god@mytum.de>
+Date:   Wed Jul 22 00:16:25 2020 +0200
+
+    Before Demo
+
+[33mcommit 3fc7f747b2e1e2567e68c09635bda8fa07531fa3[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Thu Jul 16 22:51:51 2020 +0200
+
+    Adding TfIdf
+
+[33mcommit fa2529e16c697427592b9a6ff3a71a334cabcc7c[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Thu Jul 16 22:14:10 2020 +0200
+
+    Adding Reformer
+
+[33mcommit 1fe9204a324a25c43c98bc0c7823201b53c5c752[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Tue Jul 14 14:31:37 2020 +0200
+
+    Adding Stemmer
+
+[33mcommit 04a754a4d602d8dfec9e9e0dc75aea9e1f0497d9[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Tue Jul 14 12:58:11 2020 +0200
+
+    Adding get sentence to get nearest
+
+[33mcommit 544ad55e8baa849226a8ab9356de8c935b8f5de9[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Sat Jul 11 14:42:17 2020 +0200
+
+    Adding Separate Data For 2018 and 2019
+
+[33mcommit 492f9c89670013ef9f51c39c5dfc4eadf5d90945[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri Jul 3 00:01:06 2020 +0200
+
+    Adding GPT and GPT-2
+
+[33mcommit 0ce72342b9788f0333714c2ad25c15ed735a68a5[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri Jun 26 04:13:44 2020 +0200
+
+    Adding Comparison To Maximum K
+
+[33mcommit 7369841913a7420ff14056d8d177c32447bdb57f[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri Jun 26 02:11:51 2020 +0200
+
+    Handling Wrong User Key
+
+[33mcommit b69941f31a94e8164a61f82b19091f8370990aca[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Thu Jun 25 20:30:28 2020 +0200
+
+    Removing Unused Files
+
+[33mcommit be74c815415da7f27239be4c8c1670299e67b7da[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Thu Jun 25 20:28:59 2020 +0200
+
+    Removing Unused Files
+
+[33mcommit c554cc37989b18d93668f448f7dfcce41e7314f6[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Thu Jun 25 20:28:33 2020 +0200
+
+    Handling File Upload
+
+[33mcommit 19fff771c267043c75523a816afed8a775579c9a[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Thu Jun 25 20:09:35 2020 +0200
+
+    Editing Pickle File
+
+[33mcommit 81b4be0176ff94ede7acc50b4dc15d8430a29a86[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Wed Jun 24 23:00:03 2020 +0200
+
+    Adding Authentication
+
+[33mcommit 7d6257049d6198c59f9a68d85878339188157407[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri Jun 19 01:55:31 2020 +0200
+
+    Adding Email and Changing ID to String
+
+[33mcommit e8e3e84e04bb3a177926ab1a9171a7a507ca7f87[m[33m ([m[1;31morigin/ObjectivesSimilarity[m[33m)[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri Jun 12 01:26:08 2020 +0200
+
+    Remembering Indexed Files
+
+[33mcommit 30b631effaa8481577d20c5ab444607211282de9[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Thu Jun 11 23:41:11 2020 +0200
+
+    Fixing Sentence
+
+[33mcommit 0a77b9ddb69e1d70cfabc18363f963a1f5345bf6[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri Jun 5 04:11:44 2020 +0200
+
+    Enabling CORS
+
+[33mcommit a4db5d7c86bc6a819689ccd51c3b94b49ca4c70e[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri Jun 5 00:45:42 2020 +0200
+
+    Adding xlm and xlnet
+
+[33mcommit 1474b6fd286a9207e9fc101ed600a85299cbd7e4[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri Jun 5 00:12:58 2020 +0200
+
+    Refactoring TF HUB Modules
+
+[33mcommit 221f2e7d5c0cbad045eb4ef5611d0d7d6fed28b4[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Thu Jun 4 19:32:11 2020 +0200
+
+    Putting Each Model in Own File
+
+[33mcommit 1c9a48fc92a18fcdfb3cbb8f476a40a24e0834d9[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Thu Jun 4 19:02:19 2020 +0200
+
+    Moving Elmo To Own Class
+
+[33mcommit 03037e8e2bf8cdb0bd788b4ddf960f1af7783d87[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri May 29 06:53:05 2020 +0200
+
+    Edits
+
+[33mcommit cb8801b2edad8bf636d2738945e763d1701ca9d3[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri May 29 06:51:06 2020 +0200
+
+    Adding ProcFile
+
+[33mcommit a279402d5509ed295cea48b1edcc2b3f011046cf[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri May 29 06:01:46 2020 +0200
+
+    Moving Requirements File
+
+[33mcommit a67b00f462c39f3849c376daa91d7566c5562dab[m
+Author: ge39god <ge39god@mytum.de>
+Date:   Fri May 29 05:55:35 2020 +0200
+
+    Adding Requirements File
+
+[33mcommit d98347ebc499b86c6a12b9fcc894afb096841ed4[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri May 29 05:40:44 2020 +0200
+
+    Adding Indexed Files
+
+[33mcommit ad195d56e9774dc0df428d43ec7bd68134f6d3a3[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri May 29 04:55:45 2020 +0200
+
+    Basic FrontEnd
+
+[33mcommit 9ede1fa3dc6f86d204a0aeaa9067c98acda08a0f[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Thu May 28 19:08:32 2020 +0200
+
+    Adding Checkbox Options
+
+[33mcommit e787201847f9dbfab048bdbb80272249b659c0f7[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri May 22 05:32:28 2020 +0200
+
+    Adding Notebooks
+
+[33mcommit cec998078d75b598b9cf668813879b4407ec3215[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri May 22 04:57:14 2020 +0200
+
+    Adding Server Files
+
+[33mcommit acd0575eea10b7531a72a1aa599aa929a4ba7aac[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Thu May 21 17:50:26 2020 +0200
+
+    Making Comments More Elaborate
+
+[33mcommit da13dc87d084bc9fb7258a1ae96bc5447ef00b54[m
+Author: ge39god <ge39god@mytum.de>
+Date:   Fri May 15 07:06:15 2020 +0200
+
+    Adding Notebook
+
+[33mcommit ac9eca9407483fcf7846e3d00ed2af15a271bd6c[m
+Author: ge39god <ge39god@mytum.de>
+Date:   Fri May 15 06:47:06 2020 +0200
+
+    Organizing
+
+[33mcommit eb24752e2a46f1a7ef2db1fd290b59c0e2ed6fd7[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri May 15 06:41:33 2020 +0200
+
+    Documenting Similarity Server
+
+[33mcommit 9e7c3639c7d1d1ea0e115d8e50ff53366bbfa33a[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri May 15 06:32:30 2020 +0200
+
+    Documenting Similarity Estimator
+
+[33mcommit 7c1a7d5a46ad61b6c51549013d4c3398b61688b1[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Fri May 15 06:07:51 2020 +0200
+
+    Documenting Embeddings Generator
+
+[33mcommit e37fe03d8e8184c17812a4ce23b374fc15bac98f[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Thu May 14 23:06:56 2020 +0200
+
+    Moving To Utils
+
+[33mcommit ee6a852f72b0a094b48156408b6fef18b5244000[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Thu May 14 22:34:50 2020 +0200
+
+    Assertig row shape
+
+[33mcommit 6fd6e5a40c0959ae8701b7baff48bc98cf4d7b8f[m
+Author: Mohab <mohab@DESKTOP-QE0UGAL.localdomain>
+Date:   Thu May 14 00:46:59 2020 +0200
+
+    Checkpoint
+
+[33mcommit 4e4c3a28cb52542b52b68a2cead4ecf187f74e8f[m[33m ([m[1;32mmaster[m[33m)[m
+Author: ge39god <ge39god@mytum.de>
+Date:   Fri May 8 02:24:57 2020 +0200
+
+    Addding Week 2 Notebook
+
+[33mcommit d7c8dcbe1cf14c21ad221376f05df582d7466240[m
+Author: ge39god <ge39god@mytum.de>
+Date:   Sat May 2 19:43:07 2020 +0200
+
+    Initial Version Of Notebook
