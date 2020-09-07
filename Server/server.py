@@ -471,4 +471,4 @@ def _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, i
             add_index(model, metric)
 
 if __name__ == '__main__':
-   app.run(debug = True)
+    app.run(debug=True, host='0.0.0.0')
