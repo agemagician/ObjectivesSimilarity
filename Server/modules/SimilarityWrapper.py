@@ -14,7 +14,7 @@ class SimilarityWrapper:
   def __init__(self,
     embeddings_generator: EmbeddingsGenerator,
     similarity_estimator: SimilarityEstimator,
-    output_dir = '/content/drive/My Drive',
+    output_dir = '/embeddings',
     add_output_prefix = False):
     """
     Server takes an instance of the embeddings generator class, and and instance of the similarity estimator class.
@@ -33,9 +33,10 @@ class SimilarityWrapper:
   
   def get_sentence_at_id(self, id, input_csv, id_field_name):
     sentences = pd.read_csv(input_csv)
+    sentences[id_field_name] = sentences[id_field_name].astype(str)
     sentences = sentences.set_index(id_field_name)
 
-    return sentences.loc[id][0]
+    return sentences.loc[str(id)][0]
 
 
   def get_most_similar_K_to(self, id, K, model_name, similarity_metric, input_csv, id_field_name='id', sentence_field_name='sentence'):
@@ -56,17 +57,24 @@ class SimilarityWrapper:
     hdf = pd.HDFStore(h5_file_name)
 
     key = 'key_{}'.format(id)
-    similar_k = hdf.get(key).head(K)
+    similar = hdf.get(key)
+    # similar.distance /= similar.distance.max()
+      
+    hdf.close()
+    similar.drop_duplicates()
+    similar_k = similar.head(K)
     similar_k.rename(columns={'id':id_field_name}, inplace=True)
+    similar_k[id_field_name] = similar_k[id_field_name].astype(str)
     similar_k = similar_k.set_index(id_field_name)
 
     sentences = pd.read_csv(input_csv)
+    sentences[id_field_name] = sentences[id_field_name].astype(str)
     sentences = sentences.set_index(id_field_name)
     
     similar_k = pd.concat([similar_k, sentences], axis=1, join='inner')
     similar_k.rename(columns={id_field_name:'id', sentence_field_name:'sentence'}, inplace=True)
 
-    return (sentences.loc[id], similar_k.sort_values('distance'))    
+    return (sentences.loc[str(id)], similar_k.sort_values('distance'))    
 
 
   def create_similarity_index(self, input_csv, model_names = None, similarity_metrics = None, chunk_size = 10, max_k = 10):

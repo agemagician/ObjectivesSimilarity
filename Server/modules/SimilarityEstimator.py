@@ -20,14 +20,14 @@ class SimilarityEstimator:
 
         self.distances = {
             'cosine': distance.cosine,
-            'minkowski': distance.minkowski,
+            # 'minkowski': distance.minkowski,
             'correlation': distance.correlation,
-            'jensenshannon': distance.jensenshannon,
-            'cityblock': distance.cityblock,
-            'sqeuclidean': distance.sqeuclidean,
-            'euclidean': distance.euclidean,
-            'chebyshev': distance.chebyshev,
-            'canberra': distance.canberra,
+            # 'jensenshannon': distance.jensenshannon,
+            # 'cityblock': distance.cityblock,
+            # 'sqeuclidean': distance.sqeuclidean,
+            # 'euclidean': distance.euclidean,
+            # 'chebyshev': distance.chebyshev,
+            # 'canberra': distance.canberra,
             'braycurtis': distance.braycurtis
         }
 
@@ -154,7 +154,7 @@ class SimilarityEstimator:
                 store.append('key_{}'.format(key), ordered_results_df)
 
             store.close()
-            self.__print('Done Writing {} data'.format(distance_metric))
+            self.__print('Similarity Estimator: Done Writing {} data'.format(distance_metric))
 
     def cosine(self, data: list):
         """

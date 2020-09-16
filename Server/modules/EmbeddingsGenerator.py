@@ -62,24 +62,24 @@ class EmbeddingsGenerator:
         """
 
         ## URL attributes used by __model_loader
-        self.elmo_url = elmo_url
+        # self.elmo_url = elmo_url
         self.use_url = use_url
         self.word2vec_url = word2vec_url
         self.nnlm_url = nnlm_url
-        self.bert_url = bert_url
-        self.albert_url = albert_url
-        self.xlnet_url = xlnet_url
-        self.xlm_url = xlm_url
-        self.gpt_url = gpt_url
-        self.gpt2_url = gpt2_url
+        # self.bert_url = bert_url
+        # self.albert_url = albert_url
+        # self.xlnet_url = xlnet_url
+        # self.xlm_url = xlm_url
+        # self.gpt_url = gpt_url
+        # self.gpt2_url = gpt2_url
         self.reformer_url = reformer_url
         self.distilbert_url = distilbert_url
         self.electra_url = electra_url
-        self.t5_url = t5_url
-        self.sentence_bert_url = sentence_bert_url
-        self.sentence_roberta_url = sentence_roberta_url
+        # self.t5_url = t5_url
+        # self.sentence_bert_url = sentence_bert_url
+        # self.sentence_roberta_url = sentence_roberta_url
         self.sentence_distilbert_url = sentence_distilbert_url
-        self.roberta_url = roberta_url
+        # self.roberta_url = roberta_url
 
         self.delete_models = delete_models
         self.verbose = verbose
@@ -88,21 +88,21 @@ class EmbeddingsGenerator:
             'use': USEModel,
             'word2vec': Word2VecModel,
             'nnlm': NNLMModel,
-            'bert': BertModel,
-            'albert': AlbertModel,
-            'elmo': ElmoModel,
-            'xlm': xlmModel,
-            'xlnet': xLnetModel,
-            'gpt': gptModel,
-            'gpt2': gpt2Model,
+            # 'bert': BertModel,
+            # 'albert': AlbertModel,
+            # 'elmo': ElmoModel,
+            # 'xlm': xlmModel,
+            # 'xlnet': xLnetModel,
+            # 'gpt': gptModel,
+            # 'gpt2': gpt2Model,
             'reformer': reformerModel,
             'distilbert': DistilbertModel,
             'electra': Electra_Model,
-            't5': T5_Model, 
-            'sentence_bert': SentenceBert,
-            'sentence_roberta': SentenceRoBerta,
+            # 't5': T5_Model, 
+            # 'sentence_bert': SentenceBert,
+            # 'sentence_roberta': SentenceRoBerta,
             'sentence_distilbert': SentenceDistilBert,
-            'roberta': Roberta_Model
+            # 'roberta': Roberta_Model
         }
 
         self.supported_model_names = list(self.models.keys())

@@ -18,7 +18,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 from modules.CommonNgrams import common_ngrams, common_ngram_txt
 
-tfIdf_model = TfIdf()
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db = SQLAlchemy(app)
@@ -54,30 +54,47 @@ embeddingsGenerator = EmbeddingsGenerator(delete_models=False)
 similarityEstimator = SimilarityEstimator(output_dir=OUTPUT_DIR)
 similarityWrapper = SimilarityWrapper(embeddingsGenerator, similarityEstimator, output_dir=OUTPUT_DIR)
 
-if os.path.exists('static/uploads/data.csv'):
-    print('Reading Input File')
-    input_csv = 'static/uploads/data.csv'
-    try:
-        with open('static/id_field_name.pickle', 'rb') as f:
-            print('Reading Saved ID Field Name')
-            id_field_name = pickle.load(f)
+def get_system_variables():
+    if os.path.exists('static/uploads/data.csv'):
+        print('Server: Reading Input File')
+        input_csv = 'static/uploads/data.csv'
+        try:
+            with open('static/id_field_name.pickle', 'rb') as f:
+                id_field_name = pickle.load(f)
+                print('Server: Reading Saved ID Field Name = ', id_field_name)
 
-        with open('static/sentence_field_name.pickle', 'rb') as f:
-            print('Reading Saved Sentence Field Name')
-            sentence_field_name = pickle.load(f)
+            with open('static/sentence_field_name.pickle', 'rb') as f:
+                sentence_field_name = pickle.load(f)
+                print('Server: Reading Saved Sentence Field Name = ', sentence_field_name)
 
-        with open('static/max_k.pickle', 'rb') as f:
-            print('Reading Saved Max K')
-            max_k = pickle.load(f)
+            with open('static/max_k.pickle', 'rb') as f:
+                max_k = pickle.load(f)
+                print('Server: Reading Saved Max K = ', max_k)
 
-    except Exception as e:
-        print('Error Resetting Field Names')
+            with open('static/tfidf.pickle', 'rb') as f:
+                tfIdf_model = pickle.load(f)
+                print('Server: Reading tfIDF file', tfIdf_model)
+
+
+        except Exception as e:
+            print('Server: Error Resetting Field Names')
+            id_field_name = ''
+            sentence_field_name = ''
+            max_k = 0
+            tfIdf_model = None
+    else:
+        print('Server: No Input File')
+        input_csv = ''
         id_field_name = ''
         sentence_field_name = ''
         max_k = 0
-else:
-    print('No Input File')
-    input_csv = ''
+        tfIdf_model = None
+
+    return {'input_csv': input_csv,
+            'id_field_name': id_field_name,
+            'sentence_field_name': sentence_field_name,
+            'max_k': max_k,
+            'tfIdf_model': tfIdf_model}
 
 available_embeddings = similarityWrapper.get_available_embedding_algorithms()
 available_similarity_metrics = similarityWrapper.get_available_distance_metrics()
@@ -119,7 +136,11 @@ def generate_list_variants(sentences):
   return list(set(sentences_variants))
 
 def upper_case_abbreviations(sentences):
-    return [sentence.upper() if len(sentence) <= 3 and sentence != 'new' else sentence for sentence in sentences ]
+    exclude = ['one', 'two', 'new', 'the', 'end', 'etc']
+    sentences_ = []
+    for sentence in sentences:
+        sentences_.append(' '.join([word.upper() if len(word) <= 3 and word.lower() not in exclude else word for word in sentence.split()]))
+    return sentences_
 
 def remove_single_letter(sentences):
     return [sentence for sentence in sentences if len(sentence) > 1]
@@ -134,7 +155,7 @@ def get_indexed():
             indexed_embeddings = pickle.load(f)
 
     except Exception as e:
-        print(e)
+        print('Server: ', e)
         indexed_embeddings = {}
     return indexed_embeddings
 
@@ -229,11 +250,13 @@ def search():
     if request.method == 'POST':
         user_id = request.form['id']
         K = int(request.form['k'])
+        system_variables = get_system_variables()
+        max_k = system_variables['max_k']
         K = K if K < max_k else max_k
         model_name = request.form['embedding']
         similarity_metric = request.form['similarity_metric']
 
-        sentence, similar = similarityWrapper.get_most_similar_K_to(user_id, K, model_name, similarity_metric, input_csv)
+        sentence, similar = similarityWrapper.get_most_similar_K_to(user_id, K, model_name, similarity_metric, system_variables['input_csv'])
         
         return render_template('search.html', obj = sentence, similar=similar, embeddings= available_embeddings, similarity_metrics = available_similarity_metrics)
     else:
@@ -264,7 +287,7 @@ def get_metrics():
 @cross_origin()
 @app.route('/default_models', methods = ['GET'])
 def get_default_models():
-    default_embeddings = ['use']
+    default_embeddings = ['sentence_distilbert']
     return json.dumps(default_embeddings)
 
 
@@ -313,17 +336,17 @@ def generate_models():
     sentence_key = request.form['sentence_key']
 
     with open('static/id_field_name.pickle', 'wb') as f:
-        print('Writing ID Field Name..', id_key)
+        print('Server: Writing ID Field Name..', id_key)
         pickle.dump(id_key, f)
         id_field_name = id_key
 
     with open('static/sentence_field_name.pickle', 'wb') as f:
-        print('Writing Sentence Field Name..', sentence_key)
+        print('Server: Writing Sentence Field Name..', sentence_key)
         pickle.dump(sentence_key, f)
         sentence_field_name = sentence_key
 
     with open('static/max_k.pickle', 'wb') as f:
-        print('Writing max k..', sentence_key)
+        print('Server: Writing max k = ',max_k)
         pickle.dump(max_k, f)
 
     f = request.files['file']
@@ -332,18 +355,23 @@ def generate_models():
     input_csv = file_path
 
 
-    print('Generating {} for {}'.format(models, metrics))
+    print('Server: Generating {} for {}'.format(models, metrics))
     
     try:
-        print(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv)
+        print('Server: ', chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv)
         _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv)
 
         response =  Response(status=201)
     except KeyError as e:
-        print(e)
+        print('Server: ', e)
         response =  Response(status=422, response=json.dumps({'error': 'Key Error'}), mimetype='application/json')
 
+    tfIdf_model = TfIdf()
     tfIdf_model.fit(input_csv, sentence_key)
+
+    with open('static/tfidf.pickle', 'wb') as f:
+        print('Server: Writing tfidf')
+        pickle.dump(tfIdf_model, f)
 
     return response
 
@@ -354,6 +382,9 @@ def generate_models():
 @app.route('/get_sentence', methods = ['POST'])
 def get_sentence():
     try:
+        system_variables = get_system_variables()
+        input_csv = system_variables['input_csv']
+        id_field_name = system_variables['id_field_name']
         if input_csv == '':
             return  Response(status=422, response=json.dumps({'error': 'Generate Embeddings First'}), mimetype='application/json')
         
@@ -378,17 +409,24 @@ def get_nearest():
     metric = request.json['metric']
     id = request.json['id']
     K = int(request.json['K'])
-    print('comparing {} with {}'.format(K, max_k))
+    system_variables = get_system_variables()
+    max_k = system_variables['max_k']
+    print('Server: comparing {} with {}'.format(K, max_k))
     K = K if K < max_k else max_k
-    print(method, metric, id, K)
+    print('Server: ', method, metric, id, K)
 
     try:
+        input_csv = system_variables['input_csv']
+        id_field_name = system_variables['id_field_name']
+        sentence_field_name = system_variables['sentence_field_name']
+
         user_objective = similarityWrapper.get_sentence_at_id(id, input_csv, id_field_name)
         __, nearest = similarityWrapper.get_most_similar_K_to(id, K, method, metric, input_csv, id_field_name, sentence_field_name)
         
         nearest = nearest.to_dict()
         other_objectives = list(nearest['sentence'].values())
 
+        # Fix Spacing In Objectives
         for key, value in nearest['sentence'].items():
             nearest['sentence'][key] = ' '.join(value.split())
         user_objective = ' '.join(user_objective.split())
@@ -397,7 +435,6 @@ def get_nearest():
             nearest['distance'][key] = int((1 - nearest['distance'][key] ) * 100)
 
         # other_objectives = [objective.lower() for objective in other_objectives]
-        print(other_objectives)
         # nearest['sentence'] = other_objectives
 
         nearest['userObjective'] = user_objective
@@ -408,17 +445,14 @@ def get_nearest():
             l_1 =  common_ngram_txt([user_objective], [other_objective], size=2) + common_ngram_txt([user_objective], [other_objective], size=3) + common_ngram_txt([user_objective], [other_objective], size=4)
             
             if len(l_1) < 2:
-                print('Extending L_1')
                 l_1 += common_ngram_txt([user_objective], [other_objective], size = 1)[:3]
                 
                 if len(l_1) < 4:
-                    print('Again Extending L_1')
                     l_1 += get_common_words([user_objective] + [other_objective])[:3]
             
-            if len(l_1) >= 6:
+            if len(l_1) >= 4:
                 l_1.sort(key=len, reverse=True)
-                print(l_1)
-                l_1 = l_1[:6]
+                l_1 = l_1[:4]
 
             for l__1 in l_1:
                 if l__1.lower() not in l1 and l__1.upper() not in l1:
@@ -428,16 +462,25 @@ def get_nearest():
         
 
         all_objectives = other_objectives + [user_objective]
-        l2 = tfIdf_model.get_keys(all_objectives, n=40)
+        tfIdf_model = system_variables['tfIdf_model']
+        # l2 = tfIdf_model.get_keys(all_objectives, n=40)
+        l2 = set()
+        for objective in all_objectives:
+            l_2 = tfIdf_model.get_keys([objective], n=3)
+            for l__2 in l_2:
+                if l__2.lower() not in l2 or l__2.upper() not in l2:
+                    l2.add(l__2)
+
         # l2 = remove_substring_duplicates(l2)
         # l2 = [l.lower() for l in l2]
 
-        l1 = [l.title() for l in l1]
-        l2 = [l.title() for l in l2]
+        l1 = set([l.title() for l in l1])
+        l2 = set([l.title() for l in l2])
+        l1 = l1.difference(l2)
         # l1 = remove_substring_duplicates(l1)
 
-        nearest['importantWords'] = np.unique(remove_single_letter(upper_case_abbreviations(l2))).tolist()
-        nearest['commonWords'] = np.unique(remove_single_letter(upper_case_abbreviations(l1))).tolist()
+        nearest['importantWords'] = np.unique(remove_single_letter(upper_case_abbreviations(list(l2)))).tolist()
+        nearest['commonWords'] = np.unique(remove_single_letter(upper_case_abbreviations(list(l1)))).tolist()
  
         # nearest['importantWords'] = generate_list_variants(l2)
         # nearest['commonWords'] = generate_list_variants(l1)
@@ -447,14 +490,13 @@ def get_nearest():
         return json.dumps(nearest)
         
     except KeyError as e:
-        print('Erorrrrrrrrrr')
-        print(e)
+        print('Server: ', e)
         return Response(status=422, response=json.dumps({'error': 'Key Error'}), mimetype='application/json')
 
 def _generate_models(chunk_size, models, id_key, sentence_key, max_k, metrics, input_csv, add_output_prefix=False):
-    # if os.path.exists('./embeddings'):
-    #     shutil.rmtree('./embeddings')
-    # os.makedirs('./embeddings')
+    if os.path.exists('./embeddings'):
+        shutil.rmtree('./embeddings')
+    os.makedirs('./embeddings')
 
     output_prefix = ''.join(random.choices(string.ascii_uppercase, k=5)) if add_output_prefix else ''
 
